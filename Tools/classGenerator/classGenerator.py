@@ -11,6 +11,7 @@ def main():
     parser.add_argument("-n", "--name", help="name of class")
     parser.add_argument("-a", "--author", default="Dmytro Sadovyi", help="author of code")
     parser.add_argument("-s", "--namespace", default="none", help="Wrap into namespace, default is none")
+    parser.add_argument("--nocpp", action='store_const', const=True, default=False, help="without cpp file")
     args = parser.parse_args()
     header = open("CClass.hpp.gen")
     classHeader = open(args.path + args.name + ".hpp", 'w')
@@ -31,20 +32,21 @@ def main():
             line = line[2:]
         classHeader.write(line)
 
-    source = open("CClass.cpp.gen")
-    if not os.path.exists(args.path + "private/"):
-        os.makedirs(args.path + "private/")
-    classSource = open(args.path + "private/" + args.name + ".cpp", "w")
-    replaceList[1][1] = args.name + ".cpp"
-    replaceList.append(["$HEADER_PATH$", "../" + args.name + ".h"])
-    for line in source:
-        for replaceItem in replaceList:
-            line = line.replace(replaceItem[0], replaceItem[1])
-        if args.namespace == "none" and line.startswith("$N"):
-            continue
-        elif line[:2] == "$N":
-            line = line[2:]
-        classSource.write(line)
+    if not args.nocpp:
+        source = open("CClass.cpp.gen")
+        if not os.path.exists(args.path + "private/"):
+            os.makedirs(args.path + "private/")
+        classSource = open(args.path + "private/" + args.name + ".cpp", "w")
+        replaceList[1][1] = args.name + ".cpp"
+        replaceList.append(["$HEADER_PATH$", "../" + args.name + ".h"])
+        for line in source:
+            for replaceItem in replaceList:
+                line = line.replace(replaceItem[0], replaceItem[1])
+            if args.namespace == "none" and line.startswith("$N"):
+                continue
+            elif line[:2] == "$N":
+                line = line[2:]
+            classSource.write(line)
 
 
 if __name__ == "__main__":

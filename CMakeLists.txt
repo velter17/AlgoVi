@@ -24,6 +24,7 @@ set ( BOOST_USE_STATIC_LIBS ON )
 set ( BOOST_USE_MULTITHREADED ON )
 
 #include dirs
+include_directories( ${PROJECT_SOURCE_DIR} )
 include_directories ( ${Boost_INCLUDE_DIRS} )
 
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
@@ -33,5 +34,5 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
 endif()
 
 add_subdirectory ( "algovi" )
-#add_subdirectory ( "framework" )
+add_subdirectory ( "framework" )
 
