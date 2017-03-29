@@ -38,7 +38,7 @@ def main():
             os.makedirs(args.path + "private/")
         classSource = open(args.path + "private/" + args.name + ".cpp", "w")
         replaceList[1][1] = args.name + ".cpp"
-        replaceList.append(["$HEADER_PATH$", "../" + args.name + ".h"])
+        replaceList.append(["$HEADER_PATH$", "../" + args.name + ".hpp"])
         for line in source:
             for replaceItem in replaceList:
                 line = line.replace(replaceItem[0], replaceItem[1])

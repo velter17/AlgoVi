@@ -9,6 +9,7 @@
 #include <QLayout>
 #include <QPlainTextEdit>
 
+#include "controller/terminal/CPlainTextTerminal.hpp"
 #include "gui/CMainWindow.hpp"
 
 namespace NMainWindow
@@ -20,8 +21,8 @@ const int sDefaultWindowWidth = 600;
 CMainWindow::CMainWindow()
 {
     mMainLayout = new QVBoxLayout;
-    QPlainTextEdit* editor = new QPlainTextEdit(this);
-    mMainLayout->addWidget(editor);
+    QWidget* terminal = new NController::CPlainTextTerminal(this);
+    mMainLayout->addWidget(terminal);
 
     setCentralWidget(new QWidget);
     centralWidget()->setLayout(mMainLayout);

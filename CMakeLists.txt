@@ -38,4 +38,5 @@ include ( "build/Libraries.cmake" )
 add_subdirectory ( "algovi" )
 add_subdirectory ( "framework" )
 add_subdirectory ( "gui" )
+add_subdirectory ( "controller" )
 

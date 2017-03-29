@@ -7,6 +7,9 @@ set ( ALGOVI_GUI_LIB_SOURCES
 
 add_library ( ${ALGOVI_GUI_LIB_NAME} STATIC ${ALGOVI_GUI_LIB_SOURCES} )
 
+target_link_libraries( ${ALGOVI_GUI_LIB_NAME}
+    ${TERMINAL_LIB_NAME} )
+
 qt5_use_modules ( ${ALGOVI_GUI_LIB_NAME} Widgets Core)
 
 install (
