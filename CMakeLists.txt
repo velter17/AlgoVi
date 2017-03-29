@@ -33,6 +33,9 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
     set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEBUD_OUTPUT" )
 endif()
 
+include ( "build/Libraries.cmake" )
+
 add_subdirectory ( "algovi" )
 add_subdirectory ( "framework" )
+add_subdirectory ( "gui" )
 

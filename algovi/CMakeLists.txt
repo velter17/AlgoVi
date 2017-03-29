@@ -7,6 +7,10 @@ file ( GLOB_RECURSE ALGOVI_APP_SOURCES
 
 add_executable ( ${ALGOVI_APP_NAME} ${ALGOVI_APP_SOURCES} )
 
+target_link_libraries( ${ALGOVI_APP_NAME} ${ALGOVI_GUI_LIB_NAME} )
+
+qt5_use_modules ( ${ALGOVI_APP_NAME} Core Widgets)
+
 install (
     TARGETS 
         ${ALGOVI_APP_NAME}
