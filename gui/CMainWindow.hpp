@@ -10,6 +10,8 @@
 
 #include <QMainWindow>
 
+#include "controller/terminal/ITerminal.hpp"
+
 namespace NMainWindow
 {
 
@@ -19,8 +21,11 @@ public: // methods
     CMainWindow();
     ~CMainWindow();
 
+    NController::ITerminal* getTerminal();
+
 private: // fields
     QLayout* mMainLayout;
+    NController::ITerminal* mTerminal;
 };
 
 } // namespace NMainWindow

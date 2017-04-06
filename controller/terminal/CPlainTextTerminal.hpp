@@ -25,6 +25,15 @@ public: // methods
     void mouseDoubleClickEvent(QMouseEvent *e) override;
     void contextMenuEvent(QContextMenuEvent *e) override;
 
+    void appendSimpleText(const QString& text) override;
+    void appendHtmlText(const QString& text) override;
+    void appendErrorText(const QString& text) override;
+
+private: // methods
+    void displaySimpleText(const QString& text) override;
+    void displayHtmlText(const QString& text) override;
+    void onWriterChanged(WriterType::EType newWriter);
+
 private: // fields
     struct Colors
     {
@@ -34,6 +43,7 @@ private: // fields
         static QColor Error;
     };
     QPalette mPalette;
+    QString mInputBuffer;
 };
 
 } // namespace NController

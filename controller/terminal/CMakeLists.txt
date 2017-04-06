@@ -6,6 +6,8 @@ set ( TERMINAL_LIB_SOURCES
     "private/CTerminalBase.cpp"
     "CPlainTextTerminal.hpp"
     "private/CPlainTextTerminal.cpp"
+    "TerminalHelpers.hpp"
+    "private/TerminalHelpers.cpp"
     )
 
 add_library ( ${TERMINAL_LIB_NAME} STATIC ${TERMINAL_LIB_SOURCES} )

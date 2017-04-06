@@ -21,8 +21,9 @@ const int sDefaultWindowWidth = 600;
 CMainWindow::CMainWindow()
 {
     mMainLayout = new QVBoxLayout;
-    QWidget* terminal = new NController::CPlainTextTerminal(this);
+    NController::CPlainTextTerminal* terminal = new NController::CPlainTextTerminal(this);
     mMainLayout->addWidget(terminal);
+    mTerminal = terminal;
 
     setCentralWidget(new QWidget);
     centralWidget()->setLayout(mMainLayout);
@@ -38,7 +39,12 @@ CMainWindow::CMainWindow()
 
 CMainWindow::~CMainWindow()
 {
-    delete mMainLayout;
+   delete mMainLayout;
+}
+
+NController::ITerminal *CMainWindow::getTerminal()
+{
+   return mTerminal;
 }
 
 

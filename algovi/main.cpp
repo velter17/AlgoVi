@@ -9,12 +9,11 @@
 #include <QApplication>
 #include <iostream>
 
-#include "gui/CMainWindow.hpp"
+#include "controller/CController.hpp"
 
 int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
-    NMainWindow::CMainWindow win;
-    win.show();
+    NController::CController controller;
     return app.exec();
 }
