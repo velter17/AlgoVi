@@ -9,6 +9,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QDebug>
+#include <QScrollBar>
 
 #include "controller/terminal/CPlainTextTerminal.hpp"
 #include "controller/terminal/TerminalHelpers.hpp"
@@ -47,6 +48,8 @@ void CPlainTextTerminal::keyPressEvent(QKeyEvent *e)
                || e->modifiers() == Qt::ShiftModifier
                || e->modifiers() == Qt::KeypadModifier))
     {
+        setWriter(WriterType::User);
+        this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
         this->textCursor().insertText(e->text());
         mInputBuffer += e->text();
     }
@@ -54,6 +57,8 @@ void CPlainTextTerminal::keyPressEvent(QKeyEvent *e)
     /* ctrl + shift + v */
     if(e->key() == 0x56 && e->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier))
     {
+        setWriter(WriterType::User);
+        this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
         QClipboard *clipboard = QApplication::clipboard();
         this->textCursor().insertText(clipboard->text());
         mInputBuffer += clipboard->text();
@@ -64,6 +69,8 @@ void CPlainTextTerminal::keyPressEvent(QKeyEvent *e)
            && e->modifiers() == Qt::NoModifier
            && mPromptMessageLength < textCursor().positionInBlock())
     {
+        setWriter(WriterType::User);
+        this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
         mInputBuffer.chop(1);
         QPlainTextEdit::keyPressEvent(e);
     }
@@ -73,8 +80,18 @@ void CPlainTextTerminal::keyPressEvent(QKeyEvent *e)
        (e->modifiers() == Qt::NoModifier ||
        e->modifiers() == Qt::KeypadModifier))
     {
-       qDebug () << "CPlainTextTerminal::keyPressEvent() enter pressed, execute: " << mInputBuffer;
-       emit command(mInputBuffer);
+
+       if(this->mMode == TerminalMode::WaitForCommand)
+       {
+          qDebug () << "CPlainTextTerminal::keyPressEvent() enter pressed, execute: " << mInputBuffer;
+          emit command(mInputBuffer);
+       }
+       else
+       {
+          qDebug () << "CPlainTextTerminal::keyPressEvent() enter pressed, newData: " << mInputBuffer;
+          emit newData(mInputBuffer);
+          textCursor().insertBlock();
+       }
        mInputBuffer.clear();
     }
 }
@@ -97,12 +114,14 @@ void CPlainTextTerminal::contextMenuEvent(QContextMenuEvent *e)
 void CPlainTextTerminal::appendSimpleText(const QString& text)
 {
    qDebug () << "CPlainTextTerminal::appendSimpleText() " << text;
+   setWriter(WriterType::System);
    displayHtmlText(colorize(convertTextToHtml(text), Colors::Output));
 }
 
 void CPlainTextTerminal::appendHtmlText(const QString& text)
 {
    qDebug () << "CPlainTextTerminal::appendHtmlText() " << text;
+   setWriter(WriterType::System);
    displayHtmlText(text);
 }
 
@@ -123,10 +142,12 @@ void CPlainTextTerminal::displayHtmlText(const QString& text)
 
 void CPlainTextTerminal::onWriterChanged(WriterType::EType newWriter)
 {
-   if(textCursor().positionInBlock() > 0)
+   if(textCursor().columnNumber() == 0)
    {
-      textCursor().insertBlock();
+      textCursor().deletePreviousChar();
    }
+   textCursor().insertBlock();
+   this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
 }
 
 } // namespace NController

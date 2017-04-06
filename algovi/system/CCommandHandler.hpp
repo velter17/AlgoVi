@@ -8,13 +8,27 @@
 
 #pragma once
 
+#include <memory>
+
+#include "algovi/system/jobs/IJob.hpp"
+
+namespace NController
+{
+   class CController;
+}
+
 namespace NAlgoVi
 {
 
 class CCommandHandler
 {
 public: // methods
-    CCommandHandler();
+    CCommandHandler(NController::CController* controller);
+
+    std::shared_ptr <IJob> getJob(const QString& cmd);
+
+private: // fields
+    NController::CController* mControllerPtr;
 };
 
 } // namespace NAlgoVi

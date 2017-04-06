@@ -29,6 +29,7 @@ public slots:
 
 signals:
     virtual void command(const QString& cmd);
+    virtual void newData(const QString& cmd);
 };
 
 } // namespace NController

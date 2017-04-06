@@ -10,9 +10,15 @@
 
 #include <memory>
 
-#include "algovi/system/CAlgoViSystem.hpp"
-#include "gui/CMainWindow.hpp"
-#include "controller/terminal/ITerminal.hpp"
+namespace NAlgoVi
+{
+   class CAlgoViSystem;
+}
+
+namespace NMainWindow
+{
+   class CMainWindow;
+}
 
 namespace NController
 {
@@ -21,6 +27,15 @@ class CController
 {
 public: // methods
     CController();
+
+public slots:
+    void handleLog(const QString& text);
+    void handleLogHtml(const QString& text);
+    void handleError(const QString& text);
+
+    void setInsideAppMode();
+    void lockTerminal();
+    void unlockTerminal();
 
 private: // fields
     std::shared_ptr<NAlgoVi::CAlgoViSystem> mSystemPtr;

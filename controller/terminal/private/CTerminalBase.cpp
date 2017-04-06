@@ -16,7 +16,7 @@ namespace NController
 {
 
 CTerminalBase::CTerminalBase()
-   : mLastWriter(WriterType::System)
+   : mLastWriter(WriterType::User)
    , mPrevMode(TerminalMode::WaitForCommand)
    , mMode(TerminalMode::WaitForCommand)
    , mPromptMessage("AlgoVi")
@@ -27,25 +27,32 @@ CTerminalBase::CTerminalBase()
 void CTerminalBase::lock()
 {
     assert(mMode != TerminalMode::Locked);
-
+    qDebug () << "CTerminalBase::unlock()";
     mPrevMode = mMode;
     mMode = TerminalMode::Locked;
 }
 
 void CTerminalBase::unlock()
 {
+   qDebug () << "CTerminalBase::unlock()";
    mMode = mPrevMode;
+   if(mMode != TerminalMode::WaitForCommand)
+   {
+      qDebug () << "something is going wrong....";
+   }
    displayNewCommandPrompt();
 }
 
 void CTerminalBase::setQuestionMode()
 {
+   qDebug () << "CTerminalBase::setQuestionMode()";
    mPrevMode = mMode;
    mMode = TerminalMode::Question;
 }
 
 void CTerminalBase::setInsideProcessMode()
 {
+   qDebug () << "CTerminalBase::setInsideProcessMode()";
    mPrevMode = mMode;
    mMode = TerminalMode::InsideProcess;
    setWriter(WriterType::System);
