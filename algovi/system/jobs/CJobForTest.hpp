@@ -21,6 +21,7 @@ public: // methods
     CJobForTest(NController::CController* controller);
     void run(const QStringList& args) override;
     void appendData(const QString& data) override;
+    void terminate() override;
 
 private: // fields
     NController::CController* mControllerPtr;

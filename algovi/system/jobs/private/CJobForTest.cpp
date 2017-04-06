@@ -33,5 +33,10 @@ void CJobForTest::appendData(const QString &data)
    }
 }
 
+void CJobForTest::terminate()
+{
+   emit finished();
+}
+
 
 } // namespace NAlgoVi

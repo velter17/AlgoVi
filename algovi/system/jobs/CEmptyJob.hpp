@@ -20,6 +20,7 @@ public: // methods
 
     void run(const QStringList& args) override;
     void appendData(const QString& data) override;
+    void terminate() override;
 };
 
 } // namespace NAlgoVi

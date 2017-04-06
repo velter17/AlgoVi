@@ -19,6 +19,7 @@ class IJob : public QObject
 public slots:
    virtual void run(const QStringList& args) = 0;
    virtual void appendData(const QString& data) = 0;
+   virtual void terminate() = 0;
 signals:
    void started();
    void finished();

@@ -27,5 +27,10 @@ void CEmptyJob::appendData(const QString &data)
 
 }
 
+void CEmptyJob::terminate()
+{
+
+}
+
 
 } // namespace NAlgoVi

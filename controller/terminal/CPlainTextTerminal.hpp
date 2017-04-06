@@ -20,11 +20,6 @@ class CPlainTextTerminal : public CTerminalBase, public QPlainTextEdit
 public: // methods
     CPlainTextTerminal(QWidget* parent);
 
-    void keyPressEvent(QKeyEvent* e) override;
-    void mousePressEvent(QMouseEvent *e) override;
-    void mouseDoubleClickEvent(QMouseEvent *e) override;
-    void contextMenuEvent(QContextMenuEvent *e) override;
-
     void appendSimpleText(const QString& text) override;
     void appendHtmlText(const QString& text) override;
     void appendErrorText(const QString& text) override;
@@ -33,6 +28,14 @@ private: // methods
     void displaySimpleText(const QString& text) override;
     void displayHtmlText(const QString& text) override;
     void onWriterChanged(WriterType::EType newWriter);
+
+    void keyPressEvent(QKeyEvent* e) override;
+    void mousePressEvent(QMouseEvent *e) override;
+    void mouseDoubleClickEvent(QMouseEvent *e) override;
+    void contextMenuEvent(QContextMenuEvent *e) override;
+
+    template <TerminalMode::EType mode>
+    void keyPressHandler(QKeyEvent* e);
 
 private: // fields
     struct Colors

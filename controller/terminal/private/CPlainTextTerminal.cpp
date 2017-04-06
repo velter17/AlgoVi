@@ -40,7 +40,8 @@ CPlainTextTerminal::CPlainTextTerminal(QWidget* parent)
     displayNewCommandPrompt();
 }
 
-void CPlainTextTerminal::keyPressEvent(QKeyEvent *e)
+template <>
+void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent *e)
 {
     /* Single character */
     if(e->key() >= 0x20 && e->key() <= 0x7e
@@ -50,7 +51,7 @@ void CPlainTextTerminal::keyPressEvent(QKeyEvent *e)
     {
         setWriter(WriterType::User);
         this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
-        this->textCursor().insertText(e->text());
+        displayHtmlText(convertTextToHtml(e->text()));
         mInputBuffer += e->text();
     }
 
@@ -60,14 +61,14 @@ void CPlainTextTerminal::keyPressEvent(QKeyEvent *e)
         setWriter(WriterType::User);
         this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
         QClipboard *clipboard = QApplication::clipboard();
-        this->textCursor().insertText(clipboard->text());
+        displayHtmlText(convertTextToHtml(clipboard->text()));
         mInputBuffer += clipboard->text();
     }
 
     /* Delete one character by backspace key */
     if(e->key() == Qt::Key_Backspace
            && e->modifiers() == Qt::NoModifier
-           && mPromptMessageLength < textCursor().positionInBlock())
+           && !mInputBuffer.isEmpty())
     {
         setWriter(WriterType::User);
         this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
@@ -80,20 +81,88 @@ void CPlainTextTerminal::keyPressEvent(QKeyEvent *e)
        (e->modifiers() == Qt::NoModifier ||
        e->modifiers() == Qt::KeypadModifier))
     {
-
-       if(this->mMode == TerminalMode::WaitForCommand)
-       {
-          qDebug () << "CPlainTextTerminal::keyPressEvent() enter pressed, execute: " << mInputBuffer;
-          emit command(mInputBuffer);
-       }
-       else
-       {
-          qDebug () << "CPlainTextTerminal::keyPressEvent() enter pressed, newData: " << mInputBuffer;
-          emit newData(mInputBuffer);
-          textCursor().insertBlock();
-       }
+       qDebug () << "CPlainTextTerminal::keyPressEvent() enter pressed, execute: " << mInputBuffer;
+       QString toEmit = mInputBuffer;
        mInputBuffer.clear();
+       emit command(toEmit);
     }
+}
+
+template <>
+void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent *e)
+{
+   /* Single character */
+   if(e->key() >= 0x20 && e->key() <= 0x7e
+          && (e->modifiers() == Qt::NoModifier
+              || e->modifiers() == Qt::ShiftModifier
+              || e->modifiers() == Qt::KeypadModifier))
+   {
+       setWriter(WriterType::User);
+       this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+       displayHtmlText(convertTextToHtml(e->text()));
+       mInputBuffer += e->text();
+   }
+
+   /* ctrl + shift + v */
+   if(e->key() == 0x56 && e->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier))
+   {
+       setWriter(WriterType::User);
+       this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+       QClipboard *clipboard = QApplication::clipboard();
+       displayHtmlText(convertTextToHtml(clipboard->text()));
+       mInputBuffer += clipboard->text();
+   }
+
+   /* Delete one character by backspace key */
+   if(e->key() == Qt::Key_Backspace
+          && e->modifiers() == Qt::NoModifier
+          && !mInputBuffer.isEmpty())
+   {
+       setWriter(WriterType::User);
+       this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+       mInputBuffer.chop(1);
+       QPlainTextEdit::keyPressEvent(e);
+   }
+
+   /* enter */
+   if((e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) &&
+      (e->modifiers() == Qt::NoModifier ||
+      e->modifiers() == Qt::KeypadModifier))
+   {
+       qDebug () << "CPlainTextTerminal::keyPressEvent() enter pressed, newData: " << mInputBuffer;
+       emit newData(mInputBuffer);
+       textCursor().insertBlock();
+       mInputBuffer.clear();
+   }
+}
+
+template <>
+void CPlainTextTerminal::keyPressHandler<TerminalMode::Question>(QKeyEvent *e)
+{
+
+}
+
+template <>
+void CPlainTextTerminal::keyPressHandler<TerminalMode::Locked>(QKeyEvent *e)
+{
+
+}
+
+
+void CPlainTextTerminal::keyPressEvent(QKeyEvent *e)
+{
+   if(mMode == TerminalMode::WaitForCommand)
+   {
+      keyPressHandler<TerminalMode::WaitForCommand>(e);
+   }
+   else if(mMode == TerminalMode::InsideProcess)
+   {
+      keyPressHandler<TerminalMode::InsideProcess>(e);
+   }
+   else if(mMode == TerminalMode::Question)
+   {
+      keyPressHandler<TerminalMode::Question>(e);
+   }
 }
 
 void CPlainTextTerminal::mousePressEvent(QMouseEvent *e)
@@ -137,7 +206,19 @@ void CPlainTextTerminal::displaySimpleText(const QString& text)
 
 void CPlainTextTerminal::displayHtmlText(const QString& text)
 {
+   if(!mInputBuffer.isEmpty() && getWriter() == WriterType::System)
+   {
+      for(int i = 0; i < mInputBuffer.length(); ++i)
+      {
+         textCursor().deletePreviousChar();
+      }
+   }
    textCursor().insertHtml(text);
+   if(!mInputBuffer.isEmpty() && getWriter() == WriterType::System)
+   {
+      setWriter(WriterType::User);
+      displayHtmlText(mInputBuffer);
+   }
 }
 
 void CPlainTextTerminal::onWriterChanged(WriterType::EType newWriter)
