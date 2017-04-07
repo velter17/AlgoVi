@@ -49,6 +49,11 @@ void CController::handleError(const QString &text)
    mGUIPtr->getTerminal()->appendErrorText(text);
 }
 
+void CController::exit()
+{
+   mGUIPtr->close();
+}
+
 void CController::setInsideAppMode()
 {
    mGUIPtr->getTerminal()->setInsideProcessMode();

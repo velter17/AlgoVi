@@ -33,6 +33,8 @@ public slots:
     void handleLogHtml(const QString& text);
     void handleError(const QString& text);
 
+    void exit();
+
     void setInsideAppMode();
     void lockTerminal();
     void unlockTerminal();

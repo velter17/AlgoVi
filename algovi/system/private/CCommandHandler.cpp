@@ -8,6 +8,7 @@
 
 #include "algovi/system/jobs/CEmptyJob.hpp"
 #include "algovi/system/jobs/CJobForTest.hpp"
+#include "algovi/system/jobs/CExitCommandJob.hpp"
 #include "controller/CController.hpp"
 #include "../CCommandHandler.hpp"
 
@@ -26,6 +27,8 @@ std::shared_ptr<IJob> CCommandHandler::getJob(const QString& cmd)
       return std::make_shared<CJobForTest>(mControllerPtr);
    if(cmd.isEmpty())
       return std::make_shared<CEmptyJob>();
+   if(cmd == "exit")
+      return std::make_shared<CExitCommandJob>(mControllerPtr);
    else
       return std::shared_ptr<IJob>();
 }
