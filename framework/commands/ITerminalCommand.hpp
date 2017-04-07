@@ -28,6 +28,7 @@ public slots:
     virtual void run() = 0;
     virtual void appendData(const QString& str) = 0;
     virtual void terminate() = 0;
+    virtual void setArgs(const QStringList& args) = 0;
 
     virtual void setWorkingDirectory(const QString& dir) = 0;
     virtual void setWorkingTime(uint32_t time) = 0;
