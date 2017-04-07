@@ -11,20 +11,20 @@
 namespace NAlgoVi
 {
 
-CExitCommandJob::CExitCommandJob(NController::CController *controller)
+CExitCommandJob::CExitCommandJob(NController::CController* controller)
    : mControllerPtr(controller)
 {
 
 }
 
-void CExitCommandJob::run(const QStringList &args)
+void CExitCommandJob::run(const QStringList& args)
 {
    emit started();
    mControllerPtr->exit();
    emit finished();
 }
 
-void CExitCommandJob::appendData(const QString &data)
+void CExitCommandJob::appendData(const QString& data)
 {
 
 }

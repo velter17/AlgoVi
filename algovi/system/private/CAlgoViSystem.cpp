@@ -25,12 +25,6 @@ void CAlgoViSystem::executeCommand(const QString& command)
 {
    QStringList args = command.split(" ");
    mJobPtr = mCommandHandler.getJob(*args.begin());
-   if(0 == mJobPtr)
-   {
-      mControllerPtr->handleError("[ Error ] unknown command \'" + (*args.begin()) + "\'");
-      emit finishedCommand();
-      return;
-   }
    connect(mJobPtr.get(), &IJob::started, [this](){
       mControllerPtr->handleLog("[job started]\n");
    });
@@ -38,7 +32,6 @@ void CAlgoViSystem::executeCommand(const QString& command)
       mControllerPtr->handleLog("[job finished]\n");
       emit finishedCommand();
    });
-   //mControllerPtr->setInsideAppMode();
    mJobPtr->run(args);
 }
 

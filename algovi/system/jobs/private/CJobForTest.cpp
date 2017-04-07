@@ -16,12 +16,12 @@ CJobForTest::CJobForTest(NController::CController *controller)
 {
 }
 
-void CJobForTest::run(const QStringList &args)
+void CJobForTest::run(const QStringList& args)
 {
    emit started();
 }
 
-void CJobForTest::appendData(const QString &data)
+void CJobForTest::appendData(const QString& data)
 {
    if(data == "exit")
    {

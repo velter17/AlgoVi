@@ -16,13 +16,13 @@ CEmptyJob::CEmptyJob()
 
 }
 
-void CEmptyJob::run(const QStringList &args)
+void CEmptyJob::run(const QStringList& args)
 {
    emit started();
    emit finished();
 }
 
-void CEmptyJob::appendData(const QString &data)
+void CEmptyJob::appendData(const QString& data)
 {
 
 }
