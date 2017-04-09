@@ -30,6 +30,8 @@ struct CommandType
       Empty,
       Exit,
 
+      Python,
+
       Total,
    };
 };

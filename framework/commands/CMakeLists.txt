@@ -5,9 +5,17 @@ set ( TERMINAL_COMMANDS_LIB_SOURCES
     "ITerminalSignals.hpp"
     "CTerminalCommandBase.hpp"
     "private/CTerminalCommandBase.cpp"
+    "CSystemCommand.hpp"
+    "private/CSystemCommand.cpp"
+    "CPythonShell.hpp"
+    "private/CPythonShell.cpp"
     )
 
 add_library ( ${TERMINAL_COMMANDS_LIB_NAME} STATIC ${TERMINAL_COMMANDS_LIB_SOURCES} )
+
+target_link_libraries ( ${TERMINAL_COMMANDS_LIB_NAME}
+    ${Boost_LIBRARIES}
+    )
 
 qt5_use_modules ( ${TERMINAL_COMMANDS_LIB_NAME} Core)
 

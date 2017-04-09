@@ -10,6 +10,7 @@
 #include "algovi/system/jobs/CJobForTest.hpp"
 #include "algovi/system/jobs/CExitCommandJob.hpp"
 #include "algovi/system/jobs/CWrongCommandJob.hpp"
+#include "algovi/system/jobs/CPythonInterpreter.hpp"
 #include "controller/CController.hpp"
 #include "../CCommandHandler.hpp"
 
@@ -24,6 +25,7 @@ CCommandHandler::CCommandHandler(NController::CController *controller)
    mCommandMap.insert("test_command",        CommandType::ForTest);
    mCommandMap.insert("",                    CommandType::Empty);
    mCommandMap.insert("exit",                CommandType::Exit);
+   mCommandMap.insert("python",              CommandType::Python);
 }
 
 template <CommandType::EType command>
@@ -36,7 +38,6 @@ void CCommandHandler::jobCreatorRegistrator()
 template <>
 void CCommandHandler::jobCreatorRegistrator<CommandType::Total>()
 {
-
 }
 
 template <>
@@ -61,6 +62,12 @@ template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::Wrong>()
 {
    return std::make_shared<CWrongCommandJob>(mControllerPtr);
+}
+
+template <>
+std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::Python>()
+{
+   return std::make_shared<CPythonInterpreter>(mControllerPtr);
 }
 
 std::shared_ptr<IJob> CCommandHandler::getJob(const QString& cmd)

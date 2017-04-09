@@ -18,10 +18,14 @@ namespace NCommand
 class CTerminalCommandBase : public ITerminalCommand
 {
 public: // methods
-    CTerminalCommandBase(QStringList args = QStringList());
+    CTerminalCommandBase();
+    ~CTerminalCommandBase();
 
+    void appendData(const QString& str) override;
+    void terminate() override;
     void setWorkingDirectory(const QString& dir) override;
     void setWorkingTime(uint32_t time) override;
+    void setArgs(const QStringList& args);
 
     QStringList getOptionsList();
 
@@ -37,7 +41,6 @@ protected: // fields
     QString mWorkingDirectory;
     boost::program_options::options_description mOptions;
     boost::program_options::positional_options_description mOptionsPositional;
-    QStringList mArgs;
     uint32_t mWorkingTime;
 };
 

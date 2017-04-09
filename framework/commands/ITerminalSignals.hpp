@@ -17,9 +17,9 @@ namespace NCommand
 class ITerminalSignals : public QObject
 {
 signals:
-    virtual void log(const QString& str) = 0;
-    virtual void error(const QString& str) = 0;
-    virtual void logHtml(const QString& str) = 0;
+   virtual void log(const QString& str) = 0;
+   virtual void error(const QString& str) = 0;
+   virtual void logHtml(const QString& str) = 0;
 };
 
 } // namespace NCommand

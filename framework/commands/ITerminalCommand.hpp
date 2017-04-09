@@ -21,13 +21,15 @@ namespace NCommand
  */
 class ITerminalCommand : public ITerminalSignals
 {
+    Q_OBJECT
 public: // methods
-    virtual ~ITerminalCommand() = 0;
+    virtual ~ITerminalCommand() {}
 
 public slots:
     virtual void run() = 0;
     virtual void appendData(const QString& str) = 0;
     virtual void terminate() = 0;
+    virtual void setArgs(const QStringList& args) = 0;
 
     virtual void setWorkingDirectory(const QString& dir) = 0;
     virtual void setWorkingTime(uint32_t time) = 0;
@@ -35,6 +37,9 @@ public slots:
 signals:
     void started();
     void finished(int code);
+    void log(const QString& str);
+    void error(const QString& str);
+    void logHtml(const QString& str);
 
 protected: // methods
     virtual QString getManualMessage() = 0;

@@ -223,11 +223,14 @@ void CPlainTextTerminal::displayHtmlText(const QString& text)
 
 void CPlainTextTerminal::onWriterChanged(WriterType::EType newWriter)
 {
-   if(textCursor().columnNumber() == 0)
+   if(newWriter == WriterType::System)
    {
-      textCursor().deletePreviousChar();
+       if(textCursor().columnNumber() == 0)
+       {
+          textCursor().deletePreviousChar();
+       }
+       textCursor().insertBlock();
    }
-   textCursor().insertBlock();
    this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
 }
 

@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <QObject>
 #include <memory>
 
 namespace NAlgoVi
@@ -23,8 +24,9 @@ namespace NMainWindow
 namespace NController
 {
 
-class CController
+class CController : public QObject
 {
+    Q_OBJECT
 public: // methods
     CController();
 

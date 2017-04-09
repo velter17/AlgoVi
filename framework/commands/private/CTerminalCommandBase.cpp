@@ -6,6 +6,8 @@
  * @date     28.03.2017
  */
 
+#include <QDebug>
+
 #include "framework/commands/CTerminalCommandBase.hpp"
 
 namespace NCommand
@@ -13,23 +15,45 @@ namespace NCommand
 
 const uint32_t sDefaultWorkingTime = 60 * 60 * 100; // minute
 
-CTerminalCommandBase::CTerminalCommandBase(QStringList args)
-    : mArgs(args)
-    , mWorkingTime(sDefaultWorkingTime)
+CTerminalCommandBase::CTerminalCommandBase()
+    : mWorkingTime(sDefaultWorkingTime)
 {
     mOptions.add_options()
         ("help,h", "show help message")
-        ("manual,?", "detailed help message (manual)");
+          ("manual,?", "detailed help message (manual)");
 }
 
-void CTerminalCommandBase::setWorkingDirectory(const QString &dir)
+CTerminalCommandBase::~CTerminalCommandBase()
+{
+
+}
+
+void CTerminalCommandBase::appendData(const QString& str)
+{
+   // for commands, which have not interactions
+   qDebug () << "Warning: unexpected appendData function calling";
+}
+
+void CTerminalCommandBase::terminate()
+{
+   // for commands, which have not been terminated
+   qDebug () << "Warning: unexpected terminate function calling";
+}
+
+void CTerminalCommandBase::setWorkingDirectory(const QString& dir)
 {
     mWorkingDirectory = dir;
 }
 
 void CTerminalCommandBase::setWorkingTime(uint32_t time)
 {
-    mWorkingTime = time;
+   mWorkingTime = time;
+}
+
+void CTerminalCommandBase::setArgs(const QStringList& args)
+{
+   // for commands, which have not arguments
+   qDebug () << "Warning: unexpected setArgs function calling";
 }
 
 QStringList CTerminalCommandBase::getOptionsList()
@@ -54,7 +78,7 @@ QString CTerminalCommandBase::getOptionsHelp()
     return "Allowed options:\n" + QString::fromStdString(sstream.str());
 }
 
-bool CTerminalCommandBase::readOptions(const QStringList &args, boost::program_options::variables_map &varMap)
+bool CTerminalCommandBase::readOptions(const QStringList& args, boost::program_options::variables_map& varMap)
 {
     try
     {
