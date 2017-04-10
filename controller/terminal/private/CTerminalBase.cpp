@@ -11,6 +11,7 @@
 
 #include "controller/terminal/CTerminalBase.hpp"
 #include "controller/terminal/TerminalHelpers.hpp"
+#include "framework/filesystem/filesystem.hpp"
 
 namespace NController
 {
@@ -76,6 +77,8 @@ void CTerminalBase::displayNewCommandPrompt()
 {
    setWriter(WriterType::User);
    QString promptMessage = convertTextToHtml(mPromptMessage);
+   promptMessage += "#";
+   promptMessage += NFileSystem::get_current_dir();
    promptMessage += "&nbsp;<b>" + toHtmlSymbol(8921) + "</b>&nbsp;";
    displayHtmlText(promptMessage);
    mPromptMessageLength = mPromptMessage.length() + 3;
