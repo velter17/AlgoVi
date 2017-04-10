@@ -10,6 +10,7 @@
 
 #include "../CInternalSystemCommand.hpp"
 #include "framework/commands/CSystemCommand.hpp"
+#include "framework/filesystem/filesystem.hpp"
 
 namespace NAlgoVi
 {
@@ -37,6 +38,7 @@ void CInternalSystemCommand::run(const QStringList& args)
         mCommandPtr->deleteLater();
     });
     mCommandPtr->setArgs(args);
+    mCommandPtr->setWorkingDirectory(NFileSystem::get_current_dir());
     mCommandPtr->run();
 }
 
