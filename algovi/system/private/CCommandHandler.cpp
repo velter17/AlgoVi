@@ -11,6 +11,7 @@
 #include "algovi/system/jobs/CExitCommandJob.hpp"
 #include "algovi/system/jobs/CWrongCommandJob.hpp"
 #include "algovi/system/jobs/CPythonInterpreter.hpp"
+#include "algovi/system/jobs/CInternalSystemCommand.hpp"
 #include "controller/CController.hpp"
 #include "../CCommandHandler.hpp"
 
@@ -26,6 +27,11 @@ CCommandHandler::CCommandHandler(NController::CController *controller)
    mCommandMap.insert("",                    CommandType::Empty);
    mCommandMap.insert("exit",                CommandType::Exit);
    mCommandMap.insert("python",              CommandType::Python);
+
+   for(const QString& cmd : CInternalSystemCommand::getCommandList())
+   {
+       mCommandMap.insert(cmd, CommandType::InternalSystem);
+   }
 }
 
 template <CommandType::EType command>
@@ -61,13 +67,19 @@ std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::ForTest>()
 template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::Wrong>()
 {
-   return std::make_shared<CWrongCommandJob>(mControllerPtr);
+    return std::make_shared<CWrongCommandJob>(mControllerPtr);
 }
 
 template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::Python>()
 {
    return std::make_shared<CPythonInterpreter>(mControllerPtr);
+}
+
+template <>
+std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::InternalSystem>()
+{
+   return std::make_shared<CInternalSystemCommand>(mControllerPtr);
 }
 
 std::shared_ptr<IJob> CCommandHandler::getJob(const QString& cmd)

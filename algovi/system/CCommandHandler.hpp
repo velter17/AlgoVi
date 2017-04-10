@@ -31,6 +31,7 @@ struct CommandType
       Exit,
 
       Python,
+      InternalSystem,
 
       Total,
    };
