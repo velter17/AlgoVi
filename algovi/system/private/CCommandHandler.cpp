@@ -6,6 +6,8 @@
  * @date     06.04.2017
  */
 
+#include <QStringList>
+
 #include "algovi/system/jobs/CEmptyJob.hpp"
 #include "algovi/system/jobs/CJobForTest.hpp"
 #include "algovi/system/jobs/CExitCommandJob.hpp"
