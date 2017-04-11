@@ -91,6 +91,14 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent
 template <>
 void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent *e)
 {
+    if(e->key() == Qt::Key_C && e->modifiers() == Qt::ControlModifier)
+    {
+        setWriter(WriterType::System);
+        displayHtmlText("<font color=yellow>^C</font>");
+        emit termination();
+        return;
+    }
+
    /* Single character */
    if(e->key() >= 0x20 && e->key() <= 0x7e
           && (e->modifiers() == Qt::NoModifier

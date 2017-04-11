@@ -42,5 +42,12 @@ void CAlgoViSystem::appendData(const QString &data)
    mJobPtr->appendData(data);
 }
 
+void CAlgoViSystem::terminateJob()
+{
+    assert(mJobPtr != 0);
+
+    mJobPtr->terminate();
+}
+
 
 } // namespace NAlgoVi

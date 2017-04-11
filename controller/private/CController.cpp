@@ -30,6 +30,7 @@ CController::CController()
    });
    QObject::connect(mGUIPtr->getTerminal(), SIGNAL(newData(QString)), mSystemPtr.get(), SLOT(appendData(QString)), Qt::QueuedConnection);
    QObject::connect(mSystemPtr.get(), SIGNAL(finishedCommand()), mGUIPtr->getTerminal(), SLOT(unlock()), Qt::QueuedConnection);
+   QObject::connect(mGUIPtr->getTerminal(), SIGNAL(termination()), mSystemPtr.get(), SLOT(terminateJob()));
 
    mGUIPtr->show();
 }

@@ -26,6 +26,7 @@ public: // methods
 public slots:
     void executeCommand(const QString& command);
     void appendData(const QString& data);
+    void terminateJob();
 
 signals:
     void log(const QString& str);
