@@ -26,10 +26,10 @@ void CAlgoViSystem::executeCommand(const QString& command)
    QStringList args = command.split(" ");
    mJobPtr = mCommandHandler.getJob(*args.begin());
    connect(mJobPtr.get(), &IJob::started, [this](){
-      mControllerPtr->handleLog("[job started]\n");
+//      mControllerPtr->handleLog("[job started]\n");
    });
    connect(mJobPtr.get(), &IJob::finished, [this](){
-      mControllerPtr->handleLog("[job finished]\n");
+//      mControllerPtr->handleLog("[job finished]\n");
       emit finishedCommand();
    });
    mJobPtr->run(args);
@@ -46,6 +46,7 @@ void CAlgoViSystem::terminateJob()
 {
     assert(mJobPtr != 0);
 
+    mControllerPtr->handleLog("\n");
     mJobPtr->terminate();
 }
 

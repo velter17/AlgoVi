@@ -8,6 +8,7 @@
 
 #include <QStringList>
 
+#include "algovi/system/jobs/CAppExecutor.hpp"
 #include "algovi/system/jobs/CEmptyJob.hpp"
 #include "algovi/system/jobs/CJobForTest.hpp"
 #include "algovi/system/jobs/CExitCommandJob.hpp"
@@ -31,6 +32,7 @@ CCommandHandler::CCommandHandler(NController::CController *controller)
    mCommandMap.insert("exit",                CommandType::Exit);
    mCommandMap.insert("python",              CommandType::Python);
    mCommandMap.insert("cd",                  CommandType::ChangeDir);
+   mCommandMap.insert("run",                 CommandType::ExecuteApp);
 
    for(const QString& cmd : CInternalSystemCommand::getCommandList())
    {
@@ -90,6 +92,12 @@ template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::ChangeDir>()
 {
    return std::make_shared<CChangeDirCommand>(mControllerPtr);
+}
+
+template <>
+std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::ExecuteApp>()
+{
+   return std::make_shared<CAppExecutor>(mControllerPtr);
 }
 
 std::shared_ptr<IJob> CCommandHandler::getJob(const QString& cmd)

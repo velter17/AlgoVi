@@ -33,6 +33,7 @@ struct CommandType
       Python,
       InternalSystem,
       ChangeDir,
+      ExecuteApp,
 
       Total,
    };

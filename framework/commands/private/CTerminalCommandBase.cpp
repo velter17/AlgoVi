@@ -9,6 +9,7 @@
 #include <QDebug>
 
 #include "framework/commands/CTerminalCommandBase.hpp"
+#include "framework/filesystem/filesystem.hpp"
 
 namespace NCommand
 {
@@ -17,6 +18,7 @@ const uint32_t sDefaultWorkingTime = 60 * 60 * 100; // minute
 
 CTerminalCommandBase::CTerminalCommandBase()
     : mWorkingTime(sDefaultWorkingTime)
+    , mWorkingDirectory(NFileSystem::get_current_dir())
 {
     mOptions.add_options()
         ("help,h", "show help message")
@@ -68,7 +70,7 @@ QStringList CTerminalCommandBase::getOptionsList()
 
 QString CTerminalCommandBase::getManualMessage()
 {
-    return "Sorry, no help message :(";
+    return "Sorry, no manual message :(";
 }
 
 QString CTerminalCommandBase::getOptionsHelp()
@@ -116,7 +118,6 @@ bool CTerminalCommandBase::readOptions(const QStringList& args, boost::program_o
     catch(const boost::program_options::error& e)
     {
         emit error(QString::fromLocal8Bit(e.what()));
-        emit log(getManualMessage());
         return false;
     }
     return true;
