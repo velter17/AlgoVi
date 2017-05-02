@@ -11,6 +11,10 @@ set ( TERMINAL_COMMANDS_LIB_SOURCES
     "private/CPythonShell.cpp"
     "CAppExecutor.hpp"
     "private/CAppExecutor.cpp"
+    "CCompiler.hpp"
+    "private/CCompiler.cpp"
+    "private/CCompilerExecutor.hpp"
+    "private/CCompilerExecutor.cpp"
     )
 
 add_library ( ${TERMINAL_COMMANDS_LIB_NAME} STATIC ${TERMINAL_COMMANDS_LIB_SOURCES} )

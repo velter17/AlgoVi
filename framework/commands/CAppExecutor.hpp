@@ -10,21 +10,11 @@
 
 #include <QProcess>
 
-#include "framework/commands/CTerminalCommandBase.hpp"
+#include "framework/commands/CCompiler.hpp"
+#include "framework/commands/TProgLanguages.hpp"
 
 namespace NCommand
 {
-
-struct ProgLanguage
-{
-    enum EType
-    {
-        CPP,
-        JAVA,
-        PYTHON,
-        BINARY,
-    };
-};
 
 class CAppExecutor : public CTerminalCommandBase
 {
@@ -37,6 +27,8 @@ public: // methods
     void terminate() override;
 
 private: // methods
+    void compileCode(const QString& codePath, const QStringList& flags, ProgLanguage::EType lang);
+    void runApp(const QString& appPath);
     ProgLanguage::EType parseProgLanguage(
             boost::program_options::variables_map& varMap);
 private: // fields
