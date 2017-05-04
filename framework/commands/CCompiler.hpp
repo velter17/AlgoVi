@@ -22,12 +22,15 @@ public: // types
         QString mCodePath;
         QStringList mFlags;
         ProgLanguage::EType mLanguage;
+        bool mForced;
         SCompilerTask(const QString& codePath,
                       const QStringList& flags,
-                      ProgLanguage::EType lang)
+                      ProgLanguage::EType lang,
+                      bool forced = false)
             : mCodePath(codePath)
             , mFlags(flags)
             , mLanguage(lang)
+            , mForced(forced)
         {}
     };
 public: // methods

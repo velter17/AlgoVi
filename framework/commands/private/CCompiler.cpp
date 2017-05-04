@@ -62,7 +62,7 @@ void CCompiler::compile(int index)
         }
         executor->deleteLater();
     });
-    executor->compile(mTasks[index].mCodePath, mTasks[index].mFlags, mTasks[index].mLanguage);
+    executor->compile(mTasks[index].mCodePath, mTasks[index].mFlags, mTasks[index].mLanguage, mTasks[index].mForced);
 }
 
 } // namespace NCommand

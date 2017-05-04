@@ -14,8 +14,6 @@
 #include "framework/filesystem/CWorkingDir.hpp"
 #include "framework/filesystem/filesystem.hpp"
 
-
-
 namespace NFileSystem
 {
 
@@ -30,7 +28,6 @@ fs::path get_absolute_path(const QString& path)
     if(!fs::exists(ret))
     {
         qDebug () << "does not exist";
-        return p;
     }
     return ret;
 }
@@ -112,7 +109,7 @@ QString get_file_name(const QString& file)
 QString get_file_extension(const QString& file)
 {
     fs::path p = get_absolute_path(file);
-    return QString::fromStdString(p.extension().string());
+    return QString::fromStdString(p.extension().string()).mid(1);
 }
 
 bool remove(const QString& file)

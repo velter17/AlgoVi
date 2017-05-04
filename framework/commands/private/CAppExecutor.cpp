@@ -8,9 +8,9 @@
 
 #include <QDebug>
 
-#include "../CAppExecutor.hpp"
-#include "framework/filesystem/filesystem.hpp"
+#include "framework/commands/CAppExecutor.hpp"
 #include "framework/commands/CCompiler.hpp"
+#include "framework/filesystem/filesystem.hpp"
 
 namespace NCommand
 {
@@ -61,9 +61,9 @@ CAppExecutor::CAppExecutor()
         ("input,i", boost::program_options::value <std::string>(),
             "input file path")
         ("output,o", boost::program_options::value <std::string>(),
-            "output file path")
-        ("test-save", boost::program_options::bool_switch(),
-            "save test after execution");
+            "output file path");
+//        ("test-save", boost::program_options::bool_switch(),
+//            "save test after execution");
 }
 
 void CAppExecutor::run()
@@ -78,41 +78,32 @@ void CAppExecutor::run()
 
     QString codePath = QString::fromStdString(varMap["src"].as<std::string>());
     codePath = NFileSystem::get_full_path(codePath);
-    ProgLanguage::EType language = getProgLanguageType(varMap["lang"].as<std::string>());
+    ProgLanguage::EType language = parseProgLanguage(varMap);
+
     QStringList flags;
     for(const std::string& str : mParsedFlags)
     {
-        flags << QString::fromStdString(str);
+        flags << QString::fromStdString("-" + str);
     }
-    compileCode(codePath, flags, language);
+    QStringList args;
+    for(const std::string& str : mParsedArgs)
+    {
+       args << QString::fromStdString(str);
+    }
 
-//    mProcess = new QProcess();
-//    connect(mProcess, &QProcess::readyReadStandardOutput, [this](){
-//       emit log(mProcess->readAllStandardOutput());
-//    });
-//    connect(mProcess, &QProcess::readyReadStandardError, [this](){
-//       emit error(mProcess->readAllStandardError());
-//    });
-//    mProcess->setWorkingDirectory(mWorkingDirectory);
+    mForcedCompilation = varMap["force"].as<bool>();
+    if(varMap.count("input"))
+    {
+       mInputFilePath = NFileSystem::get_full_path(
+                QString::fromStdString(varMap["input"].as<std::string>())).toStdString();
+    }
+    if(varMap.count("output"))
+    {
+       mOutputFilePath = NFileSystem::get_full_path(
+                QString::fromStdString(varMap["output"].as<std::string>())).toStdString();
+    }
 
-//    connect(mProcess, static_cast<void(QProcess::*)(int)>(&QProcess::finished),
-//            [this](int code)
-//    {
-//       emit finished(code);
-//       mProcess->deleteLater();
-//       mProcess = nullptr;
-//    });
-//    mErrorConnection = connect(mProcess, &QProcess::errorOccurred, [this](QProcess::ProcessError err){
-//        emit error(processErrorToStr(err) + "\n");
-//        emit finished(-1);
-//        mProcess->deleteLater();
-//        mProcess = nullptr;
-//    });
-
-
-//    QString appPath = QString::fromStdString(varMap["src"].as<std::string>());
-//    appPath = NFileSystem::get_full_path(appPath);
-//    mProcess->start(appPath, QProcess::Unbuffered | QProcess::ReadWrite);
+    compileCode(codePath, flags, args, language);
 }
 
 void CAppExecutor::appendData(const QString& str)
@@ -138,21 +129,21 @@ void CAppExecutor::terminate()
 
 void CAppExecutor::compileCode(const QString& codePath,
                                const QStringList& flags,
+                               const QStringList& args,
                                ProgLanguage::EType lang)
 {
-    qDebug () << "CAppExecutor::compileCode " << codePath << " " << flags;
-    CCompiler* compiler = new CCompiler({CCompiler::SCompilerTask(codePath, flags, lang)});
+    CCompiler* compiler = new CCompiler({CCompiler::SCompilerTask(codePath, flags, lang, mForcedCompilation)});
     connect(compiler, &CCompiler::log, [this](const QString& msg){
         emit log(msg);
     });
     connect(compiler, &CCompiler::error, [this](const QString& msg){
         emit error(msg);
     });
-    connect(compiler, &CCompiler::finished, [this, compiler](int code){
+    connect(compiler, &CCompiler::finished, [this, compiler, args](int code){
         if(code == 0)
         {
             QString appPath = compiler->getResult().front();
-            runApp(appPath);
+            runApp(appPath, args);
         }
         else
         {
@@ -162,11 +153,49 @@ void CAppExecutor::compileCode(const QString& codePath,
     compiler->run();
 }
 
-void CAppExecutor::runApp(const QString& appPath)
+void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
 {
+    if(!mOutputFilePath.empty())
+    {
+        mOutputFile.open(mOutputFilePath);
+        if(!mOutputFile.is_open())
+        {
+            emit error(" [ Error ] failed to open " + QString::fromStdString(mOutputFilePath)
+                      + "for writing\n");
+            emit finished(1);
+            return;
+        }
+    }
+    QString inputData;
+    if(!mInputFilePath.empty())
+    {
+       std::ifstream file(mInputFilePath);
+       if(!file.is_open())
+       {
+          emit error(" [ Error ] failed to open " + QString::fromStdString(mInputFilePath)
+                    + "for reading\n");
+          emit finished(1);
+          return;
+       }
+       std::string buffer;
+       while(std::getline(file, buffer))
+       {
+          inputData += QString::fromStdString(buffer) + "\n";
+       }
+    }
+
     mProcess = new QProcess();
     connect(mProcess, &QProcess::readyReadStandardOutput, [this](){
-       emit log(mProcess->readAllStandardOutput());
+       QString msg = mProcess->readAllStandardOutput();
+       qDebug () << "mProcess log " << msg;
+       if(mOutputFilePath.empty())
+       {
+           emit log(msg);
+       }
+       else
+       {
+           mOutputFile << msg.toStdString();
+       }
     });
     connect(mProcess, &QProcess::readyReadStandardError, [this](){
        emit error(mProcess->readAllStandardError());
@@ -184,15 +213,18 @@ void CAppExecutor::runApp(const QString& appPath)
     mErrorConnection = connect(mProcess, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
                                [this](QProcess::ProcessError err){
         emit error(processErrorToStr(err) + "\n");
-        emit finished(-1);
+        emit finished(1);
         mProcess->deleteLater();
         mProcess = nullptr;
     });
 
-
-//    QString appPath = QString::fromStdString(varMap["src"].as<std::string>());
-//    appPath = NFileSystem::get_full_path(appPath);
-    mProcess->start(appPath, QProcess::Unbuffered | QProcess::ReadWrite);
+    mProcess->start(appPath, args, QProcess::Unbuffered | QProcess::ReadWrite);
+    mProcess->waitForStarted();
+    if(!inputData.isEmpty())
+    {
+        appendData(inputData);
+        mProcess->closeWriteChannel();
+    }
 }
 
 ProgLanguage::EType CAppExecutor::parseProgLanguage(

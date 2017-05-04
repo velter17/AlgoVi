@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <fstream>
 #include <QProcess>
 
 #include "framework/commands/CCompiler.hpp"
@@ -27,8 +28,11 @@ public: // methods
     void terminate() override;
 
 private: // methods
-    void compileCode(const QString& codePath, const QStringList& flags, ProgLanguage::EType lang);
-    void runApp(const QString& appPath);
+    void compileCode(const QString& codePath,
+                     const QStringList& flags,
+                     const QStringList& args,
+                     ProgLanguage::EType lang);
+    void runApp(const QString& appPath, const QStringList& args);
     ProgLanguage::EType parseProgLanguage(
             boost::program_options::variables_map& varMap);
 private: // fields
@@ -37,6 +41,10 @@ private: // fields
     std::vector <std::string> mParsedArgs;
     QStringList mArgs;
     QMetaObject::Connection mErrorConnection;
+    bool mForcedCompilation;
+    std::string mInputFilePath;
+    std::string mOutputFilePath;
+    std::ofstream mOutputFile;
 };
 
 } // namespace NCommand

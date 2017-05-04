@@ -19,7 +19,10 @@ class CCompilerExecutor : public ITerminalSignals
     Q_OBJECT
 public: // methods
     CCompilerExecutor();
-    void compile(const QString& codePath, const QStringList& flags, ProgLanguage::EType lang);
+    void compile(const QString& codePath,
+                 const QStringList& flags,
+                 ProgLanguage::EType lang,
+                 bool forced);
 
 signals:
     void log(const QString& str);

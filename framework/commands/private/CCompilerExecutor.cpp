@@ -99,7 +99,8 @@ CCompilerExecutor::CCompilerExecutor()
 
 void CCompilerExecutor::compile(const QString& codePath,
                                 const QStringList& flags,
-                                ProgLanguage::EType lang)
+                                ProgLanguage::EType lang,
+                                bool forced)
 {
     qDebug () << "CCompilerExecutor::compile " << codePath << " " << flags;
     emit started();
@@ -110,20 +111,34 @@ void CCompilerExecutor::compile(const QString& codePath,
     }
     else
     {
+        // TODO config file instead of "const static..."
         const static QString cppCompilerStr = "g++ -std=c++11 -w -O2 $SRC_PATH$ -o $BIN_PATH$";
         const static QString javaCompilerStr = "javac -d $BIN_PATH$ $SRC_PATH$";
+        const static QString haskellCompilerStr = "ghc -o $BIN_PATH$ $SRC_PATH$";
 
         CCompilerStorage::SData& data = CCompilerStorage::getInstance().getData(codePath);
-        if(!data.isModified())
+        if(!forced && !data.isModified() && flags == data.mFlags)
         {
-            //TODO check flags
             emit finished(data.mAppPath);
             return;
         }
 
         // TODO fix lang identification
-        // TODO config file instead of "const static..."
-        QString compilerStr = lang == ProgLanguage::CPP ? cppCompilerStr : javaCompilerStr;
+        QString compilerStr;
+        if(lang == ProgLanguage::CPP)
+        {
+           compilerStr = cppCompilerStr;
+        }
+        else if(lang == ProgLanguage::JAVA)
+        {
+           compilerStr = javaCompilerStr;
+        }
+        else if(lang == ProgLanguage::HASKELL)
+        {
+           compilerStr = haskellCompilerStr;
+        }
+        emit log(" [ Info ] compilation of " + codePath + " [" + QString::fromStdString(toString(lang)) + "] ...\n");
+
         compilerStr.replace("$SRC_PATH$", data.mCodePath);
         compilerStr.replace("$BIN_PATH$", data.mAppPath);
         QStringList args;
@@ -137,14 +152,17 @@ void CCompilerExecutor::compile(const QString& codePath,
         connect(compiler, &CSystemCommand::error, [this](const QString& msg){
             emit error(msg);
         });
-        connect(compiler, &CSystemCommand::finished, [this, &data, compiler](int code){
+        connect(compiler, &CSystemCommand::finished, [this, &data, compiler, flags](int code){
             if(code == 0)
             {
                 data.setUpToDate();
+                data.mFlags = flags;
+                emit log(" [ Info ] Ready\n");
                 emit finished(data.mAppPath);
             }
             else
             {
+                emit log(" [ Info ] Compilation was finished with error\n");
                 emit finished("");
             }
             compiler->deleteLater();
