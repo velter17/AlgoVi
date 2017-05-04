@@ -76,10 +76,11 @@ WriterType::EType CTerminalBase::getWriter()
 void CTerminalBase::displayNewCommandPrompt()
 {
    setWriter(WriterType::User);
-   QString promptMessage = convertTextToHtml(mPromptMessage);
-   promptMessage += "#";
+   QString titleColor = "#ffb266";
+   QString promptMessage = colorize(convertTextToHtml(mPromptMessage), QColor(titleColor));
+   promptMessage += colorize("<b>" + toHtmlSymbol(8867) + toHtmlSymbol(8866) + "</b>", QColor("#ffffff"));
    promptMessage += NFileSystem::get_current_dir();
-   promptMessage += "&nbsp;<b>" + toHtmlSymbol(8921) + "</b>&nbsp;";
+   promptMessage += colorize("&nbsp;<b>" + toHtmlSymbol(8921) + "</b>&nbsp;", QColor("#99ffff"));
    displayHtmlText(promptMessage);
    mPromptMessageLength = mPromptMessage.length() + 3;
 }
