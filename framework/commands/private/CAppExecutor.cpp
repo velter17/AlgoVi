@@ -180,7 +180,9 @@ void CAppExecutor::runApp(const QString& appPath)
        mProcess->deleteLater();
        mProcess = nullptr;
     });
-    mErrorConnection = connect(mProcess, &QProcess::errorOccurred, [this](QProcess::ProcessError err){
+    //mErrorConnection = connect(mProcess, &QProcess::errorOccurred, [this](QProcess::ProcessError err){
+    mErrorConnection = connect(mProcess, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
+                               [this](QProcess::ProcessError err){
         emit error(processErrorToStr(err) + "\n");
         emit finished(-1);
         mProcess->deleteLater();
