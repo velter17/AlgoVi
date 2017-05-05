@@ -10,9 +10,13 @@
 #include <QClipboard>
 #include <QDebug>
 #include <QScrollBar>
+#include <QTimer>
+#include <QPlainTextEdit>
+#include <QTextBlock>
 
 #include "controller/terminal/CPlainTextTerminal.hpp"
 #include "controller/terminal/TerminalHelpers.hpp"
+#include "controller/terminal/private/CPlainTextTerminalImpl.hpp"
 
 namespace NController
 {
@@ -27,21 +31,24 @@ QColor CPlainTextTerminal::Colors::Output =
         QColor(Qt::white);
 
 CPlainTextTerminal::CPlainTextTerminal(QWidget* parent)
-    : QPlainTextEdit(parent)
+    : mWidget(new CPlainTextTerminalImpl(parent))
+    , mTabPressCount(0)
 {
     mPalette.setColor(QPalette::Base, Colors::Background);
     mPalette.setColor(QPalette::Text, Colors::Main);
-    setPalette(mPalette);
+    mWidget->setPalette(mPalette);
 
     QFont font("monospace");
     font.setPixelSize(12);
-    setFont(font);
+    mWidget->setFont(font);
+
+    connect(mWidget.get(), SIGNAL(keyPressed(QKeyEvent*)), this, SLOT(keyPressAssigner(QKeyEvent*)));
 
     displayNewCommandPrompt();
 }
 
 template <>
-void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent *e)
+void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent* e)
 {
     /* Single character */
     if(e->key() >= 0x20 && e->key() <= 0x7e
@@ -50,7 +57,7 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent
                || e->modifiers() == Qt::KeypadModifier))
     {
         setWriter(WriterType::User);
-        this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+        mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
         displayHtmlText(convertTextToHtml(e->text()));
         mInputBuffer += e->text();
     }
@@ -59,7 +66,7 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent
     if(e->key() == 0x56 && e->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier))
     {
         setWriter(WriterType::User);
-        this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+        mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
         QClipboard *clipboard = QApplication::clipboard();
         displayHtmlText(convertTextToHtml(clipboard->text()));
         mInputBuffer += clipboard->text();
@@ -71,9 +78,19 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent
            && !mInputBuffer.isEmpty())
     {
         setWriter(WriterType::User);
-        this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+        mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
         mInputBuffer.chop(1);
-        QPlainTextEdit::keyPressEvent(e);
+        mWidget->pressKeyDefault(e);
+    }
+
+    if(e->key() == Qt::Key_Tab)
+    {
+       setWriter(WriterType::User);
+       if(mTabPressCount == 0)
+       {
+          QTimer::singleShot(150, this, SLOT(tabKeyHandler()));
+       }
+       ++mTabPressCount;
     }
 
     /* enter */
@@ -106,7 +123,7 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent 
               || e->modifiers() == Qt::KeypadModifier))
    {
        setWriter(WriterType::User);
-       this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+       mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
        displayHtmlText(convertTextToHtml(e->text()));
        mInputBuffer += e->text();
    }
@@ -115,7 +132,7 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent 
    if(e->key() == 0x56 && e->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier))
    {
        setWriter(WriterType::User);
-       this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+       mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
        QClipboard *clipboard = QApplication::clipboard();
        displayHtmlText(convertTextToHtml(clipboard->text()));
        mInputBuffer += clipboard->text();
@@ -127,9 +144,9 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent 
           && !mInputBuffer.isEmpty())
    {
        setWriter(WriterType::User);
-       this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+       mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
        mInputBuffer.chop(1);
-       QPlainTextEdit::keyPressEvent(e);
+       mWidget->pressKeyDefault(e);
    }
 
    /* enter */
@@ -139,7 +156,7 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent 
    {
        qDebug () << "CPlainTextTerminal::keyPressEvent() enter pressed, newData: " << mInputBuffer;
        emit newData(mInputBuffer);
-       textCursor().insertBlock();
+       mWidget->textCursor().insertBlock();
        mInputBuffer.clear();
    }
 }
@@ -156,8 +173,7 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::Locked>(QKeyEvent *e)
 
 }
 
-
-void CPlainTextTerminal::keyPressEvent(QKeyEvent *e)
+void CPlainTextTerminal::keyPressAssigner(QKeyEvent *e)
 {
    if(mMode == TerminalMode::WaitForCommand)
    {
@@ -173,19 +189,48 @@ void CPlainTextTerminal::keyPressEvent(QKeyEvent *e)
    }
 }
 
-void CPlainTextTerminal::mousePressEvent(QMouseEvent *e)
+void CPlainTextTerminal::tabKeyHandler()
 {
-
-}
-
-void CPlainTextTerminal::mouseDoubleClickEvent(QMouseEvent *e)
-{
-
-}
-
-void CPlainTextTerminal::contextMenuEvent(QContextMenuEvent *e)
-{
-
+   int lastWordLen = 0;
+   QStringList hints = complation(mInputBuffer, lastWordLen);
+   qDebug () << "hints: " << hints;
+   if(hints.empty())
+   {
+      mTabPressCount = 0;
+      return;
+   }
+   if(mTabPressCount > 1)
+   {
+      QTextBlock b = mWidget->document()->lastBlock();
+      setWriter(WriterType::System);
+      for(const QString& s : hints)
+      {
+         appendSimpleText(s + " ");
+      }
+      appendSimpleText("\n");
+      displayNewCommandPrompt();
+      displayHtmlText(mInputBuffer);
+   }
+   else
+   {
+      QString toAppend;
+      if(hints.size() == 1)
+      {
+         toAppend = hints.first();
+      }
+      else
+      {
+         int lcp = calcLCP(hints);
+         qDebug () << "lcp == " << lcp;
+         if(lcp > 0)
+         {
+            toAppend = hints.first().mid(lastWordLen, lcp-lastWordLen);
+         }
+      }
+      mInputBuffer += toAppend;
+      displayHtmlText(toAppend);
+   }
+   mTabPressCount = 0;
 }
 
 void CPlainTextTerminal::appendSimpleText(const QString& text)
@@ -207,6 +252,11 @@ void CPlainTextTerminal::appendErrorText(const QString& text)
    displayHtmlText(colorize(convertTextToHtml(text), Colors::Error));
 }
 
+QWidget *CPlainTextTerminal::getWidget()
+{
+   return mWidget.get();
+}
+
 void CPlainTextTerminal::displaySimpleText(const QString& text)
 {
    displayHtmlText(colorize(convertTextToHtml(text), Colors::Main));
@@ -214,32 +264,32 @@ void CPlainTextTerminal::displaySimpleText(const QString& text)
 
 void CPlainTextTerminal::displayHtmlText(const QString& text)
 {
-   if(!mInputBuffer.isEmpty() && getWriter() == WriterType::System)
-   {
-      for(int i = 0; i < mInputBuffer.length(); ++i)
-      {
-         textCursor().deletePreviousChar();
-      }
-   }
-   textCursor().insertHtml(text);
-   if(!mInputBuffer.isEmpty() && getWriter() == WriterType::System)
-   {
-      setWriter(WriterType::User);
-      displayHtmlText(mInputBuffer);
-   }
+//   if(!mInputBuffer.isEmpty() && getWriter() == WriterType::System)
+//   {
+//      for(int i = 0; i < mInputBuffer.length(); ++i)
+//      {
+//         mWidget->textCursor().deletePreviousChar();
+//      }
+//   }
+   mWidget->textCursor().insertHtml(text);
+//   if(!mInputBuffer.isEmpty() && getWriter() == WriterType::System)
+//   {
+//      setWriter(WriterType::User);
+//      displayHtmlText(mInputBuffer);
+//   }
 }
 
 void CPlainTextTerminal::onWriterChanged(WriterType::EType newWriter)
 {
    if(newWriter == WriterType::System)
    {
-       if(textCursor().columnNumber() == 0)
+       if(mWidget->textCursor().columnNumber() == 0)
        {
-          textCursor().deletePreviousChar();
+          mWidget->textCursor().deletePreviousChar();
        }
-       textCursor().insertBlock();
+       mWidget->textCursor().insertBlock();
    }
-   this->verticalScrollBar()->setValue(verticalScrollBar()->maximum());
+   mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
 }
 
 } // namespace NController

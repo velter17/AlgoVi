@@ -10,6 +10,9 @@
 
 #include <QObject>
 #include <QString>
+#include <memory>
+
+#include "framework/complation/CComplationProvider.hpp"
 
 namespace NController
 {
@@ -27,6 +30,7 @@ public slots:
     virtual void appendHtmlText(const QString& text) = 0;
     virtual void appendErrorText(const QString& text) = 0;
 
+    virtual void setComplation(std::shared_ptr<NCommand::CComplationProvider> provider) = 0;
 signals:
     virtual void command(const QString& cmd);
     virtual void newData(const QString& cmd);

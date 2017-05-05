@@ -35,7 +35,7 @@ struct TerminalMode
 
 class CTerminalBase : public ITerminal
 {
-    Q_OBJECT
+   //Q_OBJECT
 public: // methods
     CTerminalBase();
 
@@ -43,6 +43,8 @@ public: // methods
     void unlock() override;
     void setQuestionMode() override;
     void setInsideProcessMode() override;
+
+    void setComplation(std::shared_ptr<NCommand::CComplationProvider> provider) override;
 
 protected: // virtual methods
     virtual void displaySimpleText(const QString& text) = 0;
@@ -52,6 +54,7 @@ protected: // virtual methods
 protected: // methods
     void setWriter(WriterType::EType type);
     WriterType::EType getWriter();
+    QStringList complation(const QString& cmd, int& lastWordLen);
 
     void displayNewCommandPrompt();
 protected: // fields
@@ -60,6 +63,7 @@ protected: // fields
     TerminalMode::EType mMode;
     QString mPromptMessage;
     int mPromptMessageLength;
+    std::shared_ptr <NCommand::CComplationProvider> mComplationProvider;
 };
 
 } // namespace NController

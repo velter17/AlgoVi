@@ -28,6 +28,7 @@ QString get_full_path(const QString& path);
 
 QString get_file_name(const QString& file);
 QString get_file_extension(const QString& file);
+QString get_file_path(const QString& file);
 
 bool remove(const QString& file);
 bool create_dir(const QString& dir);

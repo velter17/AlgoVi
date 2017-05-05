@@ -59,6 +59,11 @@ void CTerminalBase::setInsideProcessMode()
    setWriter(WriterType::System);
 }
 
+void CTerminalBase::setComplation(std::shared_ptr<NCommand::CComplationProvider> provider)
+{
+   mComplationProvider = provider;
+}
+
 void CTerminalBase::setWriter(WriterType::EType type)
 {
    if(getWriter() != type)
@@ -71,6 +76,15 @@ void CTerminalBase::setWriter(WriterType::EType type)
 WriterType::EType CTerminalBase::getWriter()
 {
    return mLastWriter;
+}
+
+QStringList CTerminalBase::complation(const QString& cmd, int& lastWordLen)
+{
+   if(0 == mComplationProvider)
+   {
+      return QStringList();
+   }
+   return mComplationProvider->complation(cmd, lastWordLen);
 }
 
 void CTerminalBase::displayNewCommandPrompt()

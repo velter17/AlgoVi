@@ -22,7 +22,7 @@ CMainWindow::CMainWindow()
 {
     mMainLayout = new QVBoxLayout;
     NController::CPlainTextTerminal* terminal = new NController::CPlainTextTerminal(this);
-    mMainLayout->addWidget(terminal);
+    mMainLayout->addWidget(terminal->getWidget());
     mTerminal = terminal;
 
     setCentralWidget(new QWidget);

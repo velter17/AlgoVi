@@ -112,6 +112,12 @@ QString get_file_extension(const QString& file)
     return QString::fromStdString(p.extension().string()).mid(1);
 }
 
+QString get_file_path(const QString &file)
+{
+   fs::path p = get_absolute_path(file);
+   return QString::fromStdString(p.parent_path().string());
+}
+
 bool remove(const QString& file)
 {
     return fs::remove(get_absolute_path(file));
@@ -119,7 +125,7 @@ bool remove(const QString& file)
 
 bool create_dir(const QString& dir)
 {
-    return fs::create_directory(get_absolute_path(dir));
+   return fs::create_directory(get_absolute_path(dir));
 }
 
 } // namespace NFileSystem

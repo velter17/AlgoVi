@@ -17,6 +17,8 @@ namespace NController
 QString convertTextToHtml(const QString& text);
 QString colorize(const QString& text, QColor color);
 QString toHtmlSymbol(int code);
+int calcLCP(const QStringList& list);
+
 
 } // namespace NController
 
