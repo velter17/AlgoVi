@@ -1,0 +1,13 @@
++ 9. Internal system commands
++ 10. compiler handler
++ 11. Code executor
++ 12. terminal complation
++ 13. file system
++ 14. termination request
+15. terminal history
+16. test provider
+17. executor save test
+18. provide test lib checkers
+19. tester command
+20. problems parser
+
