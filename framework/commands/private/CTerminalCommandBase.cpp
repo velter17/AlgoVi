@@ -63,7 +63,7 @@ QStringList CTerminalCommandBase::getOptionsList()
     QStringList ret;
     for(const auto itr : mOptions.options())
     {
-        ret.append(QString::fromStdString(itr->canonical_display_name()));
+        ret.append("--" + QString::fromStdString(itr->canonical_display_name()));
     }
     return ret;
 }

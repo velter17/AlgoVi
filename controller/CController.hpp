@@ -11,6 +11,8 @@
 #include <QObject>
 #include <memory>
 
+#include "framework/complation/CComplationProvider.hpp"
+
 namespace NAlgoVi
 {
    class CAlgoViSystem;
@@ -29,6 +31,8 @@ class CController : public QObject
     Q_OBJECT
 public: // methods
     CController();
+
+    void setComplation(std::shared_ptr<NCommand::CComplationProvider> provider);
 
 public slots:
     void handleLog(const QString& text);

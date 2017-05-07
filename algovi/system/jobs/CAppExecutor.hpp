@@ -31,6 +31,7 @@ public: // methods
     void run(const QStringList& args) override;
     void appendData(const QString& data) override;
     void terminate() override;
+    QStringList getArguments() override;
 
 private: // fields
     NController::CController* mControllerPtr;

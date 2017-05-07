@@ -18,13 +18,12 @@ namespace NAlgoVi
 CAppExecutor::CAppExecutor(NController::CController* controller)
     : mControllerPtr(controller)
 {
-
+    mExecutor = new NCommand::CAppExecutor();
 }
 
 void CAppExecutor::run(const QStringList& args)
 {
     emit started();
-    mExecutor = new NCommand::CAppExecutor();
     connect(mExecutor, SIGNAL(log(QString)), mControllerPtr, SLOT(handleLog(QString)));
     connect(mExecutor, SIGNAL(error(QString)), mControllerPtr, SLOT(handleError(QString)));
     connect(mExecutor, &NCommand::CAppExecutor::finished, [this](int code)
@@ -45,6 +44,11 @@ void CAppExecutor::appendData(const QString& data)
 void CAppExecutor::terminate()
 {
     mExecutor->terminate();
+}
+
+QStringList CAppExecutor::getArguments()
+{
+    return mExecutor->getOptionsList();
 }
 
 } // namespace NAlgoVi

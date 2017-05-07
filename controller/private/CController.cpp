@@ -18,8 +18,8 @@ namespace NController
 
 CController::CController()
 {
-   mSystemPtr.reset(new NAlgoVi::CAlgoViSystem(this));
    mGUIPtr.reset(new NMainWindow::CMainWindow());
+   mSystemPtr.reset(new NAlgoVi::CAlgoViSystem(this));
 
    QObject::connect(mSystemPtr.get(), SIGNAL(log(QString)), mGUIPtr->getTerminal(), SLOT(appendSimpleText(QString)), Qt::QueuedConnection);
    QObject::connect(mGUIPtr->getTerminal(), &ITerminal::command, [this](const QString& cmd)
@@ -29,13 +29,15 @@ CController::CController()
       mSystemPtr->executeCommand(cmd);
    });
    QObject::connect(mGUIPtr->getTerminal(), SIGNAL(newData(QString)), mSystemPtr.get(), SLOT(appendData(QString)), Qt::QueuedConnection);
-   QObject::connect(mSystemPtr.get(), SIGNAL(finishedCommand()), dynamic_cast<QObject*>(mGUIPtr->getTerminal()), SLOT(unlock()), Qt::QueuedConnection);
+   QObject::connect(mSystemPtr.get(), SIGNAL(finishedCommand()), mGUIPtr->getTerminal(), SLOT(unlock()), Qt::QueuedConnection);
    QObject::connect(mGUIPtr->getTerminal(), SIGNAL(termination()), mSystemPtr.get(), SLOT(terminateJob()));
 
    mGUIPtr->show();
+}
 
-   mGUIPtr->getTerminal()->setComplation(
-            std::shared_ptr<NCommand::CComplationProvider>(new NCommand::CComplationProvider()));
+void CController::setComplation(std::shared_ptr<NCommand::CComplationProvider> provider)
+{
+    mGUIPtr->getTerminal()->setComplation(provider);
 }
 
 void CController::handleLog(const QString &text)

@@ -224,7 +224,7 @@ void CPlainTextTerminal::tabKeyHandler()
          qDebug () << "lcp == " << lcp;
          if(lcp > 0)
          {
-            toAppend = hints.first().mid(lastWordLen, lcp-lastWordLen);
+             toAppend = hints.first().mid(lastWordLen, lcp-lastWordLen);
          }
       }
       mInputBuffer += toAppend;

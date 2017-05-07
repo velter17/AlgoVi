@@ -55,6 +55,8 @@ private: // methods
     template <CommandType::EType command>
     void jobCreatorRegistrator();
 
+    void makeComplationProvider();
+
 
 private: // fields
     NController::CController* mControllerPtr;

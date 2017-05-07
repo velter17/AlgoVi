@@ -7,6 +7,7 @@
  */
 
 #include <QStringList>
+#include <QDebug>
 
 #include "algovi/system/jobs/CAppExecutor.hpp"
 #include "algovi/system/jobs/CEmptyJob.hpp"
@@ -38,6 +39,8 @@ CCommandHandler::CCommandHandler(NController::CController *controller)
    {
        mCommandMap.insert(cmd, CommandType::InternalSystem);
    }
+
+   makeComplationProvider();
 }
 
 template <CommandType::EType command>
@@ -108,6 +111,25 @@ std::shared_ptr<IJob> CCommandHandler::getJob(const QString& cmd)
       type = mCommandMap[cmd];
    }
    return (this->*mCreatorFunctions[(std::size_t)type])();
+}
+
+void CCommandHandler::makeComplationProvider()
+{
+    std::shared_ptr<NCommand::CComplationProvider> ret(new NCommand::CComplationProvider);
+    for(const QString& key : mCommandMap.keys())
+    {
+        auto job = getJob(key);
+        if(job->getArguments().isEmpty())
+        {
+            ret->addCommand(key);
+        }
+        else
+        {
+            qDebug () << "addCommand " << key << " " << job->getArguments();
+            ret->addCommand(key, job->getArguments());
+        }
+    }
+    mControllerPtr->setComplation(ret);
 }
 
 

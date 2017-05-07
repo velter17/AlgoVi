@@ -49,14 +49,14 @@ QStringList CComplationProvider::complation(const QString& cmd, int& lastWordLen
    {
       const QString& commandName = cmdList.first();
       const QString& last = cmdList.last();
-      lastWordLen = last.length();
       if(mArgumentsList.find(commandName) != mArgumentsList.end() && NCommandParser::isArgument(last))
       {
-         return NCommandParser::processHint(mArgumentsList[commandName], last);
+          lastWordLen = last.length();
+          return NCommandParser::processHint(mArgumentsList[commandName], last);
       }
       else
       {
-         return NCommandParser::filesystemComplation(last);
+          return NCommandParser::filesystemComplation(last, lastWordLen);
       }
    }
 }

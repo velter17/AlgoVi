@@ -44,18 +44,31 @@ inline QStringList processHint(const QStringList& list, const QString& arg)
    return ret;
 }
 
-inline QStringList filesystemComplation(const QString& arg)
+inline QStringList filesystemComplation(const QString& arg, int& lastWordLen)
 {
    QString path = NFileSystem::get_full_path(arg);
    qDebug () << "filesystemCompletion: " << arg << " -> " << path;
-   if(NFileSystem::is_directory(arg))
+   if(arg.endsWith('/') && NFileSystem::is_directory(arg))
    {
-      return NFileSystem::content_list(arg);
+       lastWordLen = 0;
+       QStringList ret = NFileSystem::content_list(arg);
+       if(ret.size() == 1 && NFileSystem::is_directory(path + "/" + ret.first()))
+       {
+          ret.first().append('/');
+       }
+       return ret;
    }
    else
    {
       QString filePath = NFileSystem::get_file_path(arg);
-      return processHint(NFileSystem::content_list(filePath), NFileSystem::get_file_name(arg));
+      QString fileName = NFileSystem::get_file_name(arg);
+      QStringList ret = processHint(NFileSystem::content_list(filePath), fileName);
+      if(ret.size() == 1 && NFileSystem::is_directory(arg + ret.first()))
+      {
+          ret.first().append('/');
+      }
+      lastWordLen = fileName.length();
+      return ret;
    }
 }
 
