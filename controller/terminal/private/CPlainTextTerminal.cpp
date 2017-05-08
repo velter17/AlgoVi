@@ -34,6 +34,8 @@ CPlainTextTerminal::CPlainTextTerminal(QWidget* parent)
     : mWidget(new CPlainTextTerminalImpl(parent))
     , mTabPressCount(0)
 {
+    mHistoryItr = mHistory.end();
+
     mPalette.setColor(QPalette::Base, Colors::Background);
     mPalette.setColor(QPalette::Text, Colors::Main);
     mWidget->setPalette(mPalette);
@@ -83,6 +85,7 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent
         mWidget->pressKeyDefault(e);
     }
 
+    /* Tab complation */
     if(e->key() == Qt::Key_Tab)
     {
        setWriter(WriterType::User);
@@ -93,12 +96,66 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent
        ++mTabPressCount;
     }
 
+    /* Restore command from history */
+    if(e->key() == Qt::Key_Up || e->key() == Qt::Key_Down)
+    {
+        QString toDisplay;
+        if(e->key() == Qt::Key_Up && mHistoryItr == mHistory.end() && !mHistory.isEmpty())
+        {
+            mLastTypedCommand = mInputBuffer;
+        }
+        if(e->key() == Qt::Key_Up && !mHistory.isEmpty())
+        {
+            if(mHistoryItr != mHistory.begin())
+            {
+                --mHistoryItr;
+            }
+            toDisplay = *mHistoryItr;
+        }
+        if(e->key() == Qt::Key_Down && mHistoryItr == mHistory.end())
+        {
+            toDisplay = mInputBuffer;
+        }
+        if(e->key() == Qt::Key_Down && mHistoryItr != mHistory.end() && !mHistory.isEmpty())
+        {
+            ++mHistoryItr;
+            if(mHistoryItr == mHistory.end())
+            {
+                toDisplay = mLastTypedCommand;
+            }
+            else
+            {
+                toDisplay = *mHistoryItr;
+            }
+        }
+        QTextBlock block = mWidget->document()->lastBlock();
+        QTextCursor p(block);
+        p.movePosition(QTextCursor::EndOfBlock);
+        p.setPosition(p.position()-mInputBuffer.size());
+        p.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+        p.removeSelectedText();
+        displayHtmlText(toDisplay);
+        mInputBuffer = toDisplay;
+        p.movePosition(QTextCursor::EndOfBlock);
+    }
+
     /* enter */
     if((e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) &&
        (e->modifiers() == Qt::NoModifier ||
        e->modifiers() == Qt::KeypadModifier))
     {
        qDebug () << "CPlainTextTerminal::keyPressEvent() enter pressed, execute: " << mInputBuffer;
+       if(mHistoryItr != mHistory.end() && *mHistoryItr == mInputBuffer)
+       {
+           mHistory.erase(mHistoryItr);
+       }
+       if(!mInputBuffer.isEmpty())
+       {
+           mHistory.append(mInputBuffer);
+       }
+       mHistoryItr = mHistory.end();
+       mLastTypedCommand.clear();
+
        QString toEmit = mInputBuffer;
        mInputBuffer.clear();
        emit command(toEmit);
@@ -201,7 +258,6 @@ void CPlainTextTerminal::tabKeyHandler()
    }
    if(mTabPressCount > 1)
    {
-      QTextBlock b = mWidget->document()->lastBlock();
       setWriter(WriterType::System);
       for(const QString& s : hints)
       {
@@ -264,19 +320,7 @@ void CPlainTextTerminal::displaySimpleText(const QString& text)
 
 void CPlainTextTerminal::displayHtmlText(const QString& text)
 {
-//   if(!mInputBuffer.isEmpty() && getWriter() == WriterType::System)
-//   {
-//      for(int i = 0; i < mInputBuffer.length(); ++i)
-//      {
-//         mWidget->textCursor().deletePreviousChar();
-//      }
-//   }
    mWidget->textCursor().insertHtml(text);
-//   if(!mInputBuffer.isEmpty() && getWriter() == WriterType::System)
-//   {
-//      setWriter(WriterType::User);
-//      displayHtmlText(mInputBuffer);
-//   }
 }
 
 void CPlainTextTerminal::onWriterChanged(WriterType::EType newWriter)

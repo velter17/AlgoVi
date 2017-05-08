@@ -56,7 +56,7 @@ protected: // methods
     WriterType::EType getWriter();
     QStringList complation(const QString& cmd, int& lastWordLen);
 
-    void displayNewCommandPrompt();
+    virtual void displayNewCommandPrompt();
 protected: // fields
     WriterType::EType mLastWriter;
     TerminalMode::EType mPrevMode;

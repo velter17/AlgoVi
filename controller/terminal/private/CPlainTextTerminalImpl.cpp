@@ -18,7 +18,22 @@ CPlainTextTerminalImpl::CPlainTextTerminalImpl(QWidget* parent)
 
 void CPlainTextTerminalImpl::keyPressEvent(QKeyEvent* e)
 {
-   emit keyPressed(e);
+    emit keyPressed(e);
+}
+
+void CPlainTextTerminalImpl::mousePressEvent(QMouseEvent *e)
+{
+
+}
+
+void CPlainTextTerminalImpl::mouseDoubleClickEvent(QMouseEvent *e)
+{
+
+}
+
+void CPlainTextTerminalImpl::contextMenuEvent(QContextMenuEvent *e)
+{
+
 }
 
 void CPlainTextTerminalImpl::pressKeyDefault(QKeyEvent *e)

@@ -37,11 +37,6 @@ private: // methods
     void displayHtmlText(const QString& text) override;
     void onWriterChanged(WriterType::EType newWriter);
 
-//    void keyPressEvent(QKeyEvent* e) override;
-//    void mousePressEvent(QMouseEvent *e) override;
-//    void mouseDoubleClickEvent(QMouseEvent *e) override;
-//    void contextMenuEvent(QContextMenuEvent *e) override;
-
     template <TerminalMode::EType mode>
     void keyPressHandler(QKeyEvent* e);
 
@@ -60,6 +55,9 @@ private: // fields
     QPalette mPalette;
     QString mInputBuffer;
     int mTabPressCount;
+    QStringList mHistory;
+    QStringList::iterator mHistoryItr;
+    QString mLastTypedCommand;
     std::shared_ptr<CPlainTextTerminalImpl> mWidget;
 };
 
