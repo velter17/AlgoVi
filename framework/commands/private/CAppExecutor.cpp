@@ -11,37 +11,10 @@
 #include "framework/commands/CAppExecutor.hpp"
 #include "framework/commands/CCompiler.hpp"
 #include "framework/filesystem/filesystem.hpp"
+#include "framework/commands/ProcessHelper.hpp"
 
 namespace NCommand
 {
-
-QString processErrorToStr(QProcess::ProcessError err)
-{
-    if(err == QProcess::ProcessError::FailedToStart)
-    {
-        return "Failed to start";
-    }
-    else if(err == QProcess::ProcessError::Crashed)
-    {
-        return "Crashed";
-    }
-    else if(err == QProcess::ProcessError::Timedout)
-    {
-        return "Timedout";
-    }
-    else if(err == QProcess::ProcessError::ReadError)
-    {
-        return "Read error";
-    }
-    else if(err == QProcess::ProcessError::WriteError)
-    {
-        return "Write error";
-    }
-    else
-    {
-        return "Unknown error";
-    }
-}
 
 CAppExecutor::CAppExecutor()
 {
@@ -149,6 +122,7 @@ void CAppExecutor::compileCode(const QString& codePath,
         {
             emit finished(1);
         }
+        compiler->deleteLater();
     });
     compiler->run();
 }
