@@ -4,7 +4,7 @@
 + 12. terminal complation
 + 13. file system
 + 14. termination request
-15. terminal history
++ 15. terminal history
 16. test provider
 17. executor save test
 18. provide test lib checkers
