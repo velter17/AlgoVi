@@ -8,11 +8,13 @@
 
 #include <QTimer>
 #include <QtNetwork/QNetworkReply>
+#include <fstream>
 
 #include "framework/commands/CCompiler.hpp"
 #include "framework/commands/parser/CParserCommand.hpp"
 #include "framework/commands/ProcessHelper.hpp"
 #include "framework/filesystem/filesystem.hpp"
+#include "framework/commands/testCommand/CTestProvider.hpp"
 
 namespace
 {
@@ -209,12 +211,92 @@ void CParserCommand::parseTests(const QString& htmlContent)
 
 void CParserCommand::readTests()
 {
-   log(" [ Finished ] " + QString::number(-1) + " tests were read\n");
-   QFile file(mDir.path() + "/tests.data");
-   file.open(QFile::ReadOnly);
-   QString fileData = file.readAll();
-   qDebug () << "fileData: " << fileData;
-   emit finished(0);
+   std::ifstream file(mDir.path().toStdString() + "/tests.data");
+   if(!file.is_open())
+   {
+      emit log(" [ Error ] tests.data file was not produced by parser\n");
+      emit finished(1);
+      return;
+   }
+
+   std::vector <tTest> testsToAdd;
+   int tests;
+   bool wrongFormat = false;
+   if(file >> tests)
+   {
+      while(tests--)
+      {
+         int inputLines, outputLines;
+         if(file >> inputLines >> outputLines)
+         {
+            if(inputLines < 0 || outputLines < 0)
+            {
+               wrongFormat = true;
+               break;
+            }
+            tTest test;
+            bool flag = false;
+            while(inputLines--)
+            {
+               std::string buffer;
+               if(!std::getline(file, buffer))
+               {
+                  wrongFormat = true;
+                  tests = 0;
+                  break;
+               }
+               if(flag)
+               {
+                  test.first += QString::fromStdString(buffer) + "\n";
+               }
+               flag = true;
+            }
+            while(outputLines--)
+            {
+               std::string buffer;
+               if(!std::getline(file, buffer))
+               {
+                  wrongFormat = true;
+                  tests = 0;
+                  break;
+               }
+               test.second += QString::fromStdString(buffer) + "\n";
+            }
+            while(!test.first.isEmpty() && test.first.endsWith('\n'))
+            {
+               test.first.chop(1);
+            }
+            while(!test.second.isEmpty() && test.second.endsWith('\n'))
+            {
+               test.second.chop(1);
+            }
+            testsToAdd.push_back(test);
+         }
+         else
+         {
+            wrongFormat = true;
+            break;
+         }
+      }
+   }
+   else
+   {
+      wrongFormat = true;
+   }
+
+   if(wrongFormat)
+   {
+      emit log(" [ Error ] wrong format of tests.data file, check parser logic\n");
+   }
+   else
+   {
+      log(" [ Finished ] " + QString::number(testsToAdd.size()) + " tests were read\n");
+      for(const tTest& t : testsToAdd)
+      {
+         CTestProvider::getInstance().addTest(t);
+      }
+      emit finished(0);
+   }
 }
 
 } // namespace NCommand
