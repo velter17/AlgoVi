@@ -25,7 +25,7 @@
 namespace NAlgoVi
 {
 
-CCommandHandler::CCommandHandler(NController::CController *controller)
+CCommandHandler::CCommandHandler(NController::CController* controller)
    : mControllerPtr(controller)
 {
    jobCreatorRegistrator<(CommandType::EType)0>();
@@ -113,6 +113,7 @@ std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::Test>()
    return std::make_shared<CTestCommand>(mControllerPtr);
 }
 
+template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::ParseTests>()
 {
    return std::make_shared<CParserCommand>(mControllerPtr);
