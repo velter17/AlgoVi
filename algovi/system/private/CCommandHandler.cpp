@@ -17,6 +17,7 @@
 #include "algovi/system/jobs/CPythonInterpreter.hpp"
 #include "algovi/system/jobs/CInternalSystemCommand.hpp"
 #include "algovi/system/jobs/CChangeDirCommand.hpp"
+#include "algovi/system/jobs/CTestCommand.hpp"
 #include "controller/CController.hpp"
 #include "../CCommandHandler.hpp"
 
@@ -34,6 +35,7 @@ CCommandHandler::CCommandHandler(NController::CController *controller)
    mCommandMap.insert("python",              CommandType::Python);
    mCommandMap.insert("cd",                  CommandType::ChangeDir);
    mCommandMap.insert("run",                 CommandType::ExecuteApp);
+   mCommandMap.insert("test",                CommandType::Test);
 
    for(const QString& cmd : CInternalSystemCommand::getCommandList())
    {
@@ -101,6 +103,12 @@ template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::ExecuteApp>()
 {
    return std::make_shared<CAppExecutor>(mControllerPtr);
+}
+
+template <>
+std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::Test>()
+{
+   return std::make_shared<CTestCommand>(mControllerPtr);
 }
 
 std::shared_ptr<IJob> CCommandHandler::getJob(const QString& cmd)

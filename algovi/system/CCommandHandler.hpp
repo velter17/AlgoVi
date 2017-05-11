@@ -34,6 +34,7 @@ struct CommandType
       InternalSystem,
       ChangeDir,
       ExecuteApp,
+      Test,
 
       Total,
    };

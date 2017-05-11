@@ -15,6 +15,12 @@ set ( TERMINAL_COMMANDS_LIB_SOURCES
     "private/CCompiler.cpp"
     "private/CCompilerExecutor.hpp"
     "private/CCompilerExecutor.cpp"
+    "testCommand/CTestProvider.hpp"
+    "testCommand/private/CTestProvider.cpp"
+    "testCommand/CTestCommand.hpp"
+    "testCommand/private/CTestCommand.cpp"
+    "testCommand/TableDrawer.hpp"
+    "testCommand/TestCommandHelper.hpp"
     )
 
 add_library ( ${TERMINAL_COMMANDS_LIB_NAME} STATIC ${TERMINAL_COMMANDS_LIB_SOURCES} )
