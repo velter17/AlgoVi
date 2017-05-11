@@ -13,7 +13,7 @@ target_link_libraries( ${ALGOVI_APP_NAME}
     ${TERMINAL_COMMANDS_LIB_NAME}
     )
 
-qt5_use_modules ( ${ALGOVI_APP_NAME} Core Widgets)
+qt5_use_modules ( ${ALGOVI_APP_NAME} Core Widgets Network)
 
 install (
     TARGETS 

@@ -18,7 +18,12 @@ namespace NAlgoVi
 CAppExecutor::CAppExecutor(NController::CController* controller)
     : mControllerPtr(controller)
 {
-    mExecutor = new NCommand::CAppExecutor();
+   mExecutor = new NCommand::CAppExecutor();
+}
+
+CAppExecutor::~CAppExecutor()
+{
+   mExecutor->deleteLater();
 }
 
 void CAppExecutor::run(const QStringList& args)

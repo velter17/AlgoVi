@@ -1,15 +1,14 @@
 /**
  * Project   AlgoVi
  *
- * @file     CAppExecutor.hpp
+ * @file     CParserCommand.hpp
  * @author   Dmytro Sadovyi
- * @date     12.04.2017
+ * @date     11.05.2017
  */
 
 #pragma once
 
 #include "algovi/system/jobs/IJob.hpp"
-#include "framework/commands/ITerminalSignals.hpp"
 
 namespace NController
 {
@@ -18,25 +17,24 @@ class CController;
 
 namespace NCommand
 {
-class CAppExecutor;
+class CParserCommand;
 }
 
 namespace NAlgoVi
 {
 
-class CAppExecutor : public IJob
+class CParserCommand : public IJob
 {
 public: // methods
-    CAppExecutor(NController::CController* controller);
-    ~CAppExecutor();
+    CParserCommand(NController::CController* controller);
     void run(const QStringList& args) override;
     void appendData(const QString& data) override;
     void terminate() override;
     QStringList getArguments() override;
 
 private: // fields
+    NCommand::CParserCommand* mParser;
     NController::CController* mControllerPtr;
-    NCommand::CAppExecutor* mExecutor;
 };
 
 } // namespace NAlgoVi
