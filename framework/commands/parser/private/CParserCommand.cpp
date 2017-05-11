@@ -191,6 +191,10 @@ void CParserCommand::parseTests(const QString& htmlContent)
        mProc->deleteLater();
        mProc = nullptr;
     });
+
+    QObject::connect(mProc, &QProcess::readyReadStandardOutput, [this]{
+       emit log(mProc->readAllStandardOutput());
+    });
     QObject::connect(mProc, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
                                [this](QProcess::ProcessError err){
         if(!mTerminated)
@@ -226,7 +230,7 @@ void CParserCommand::readTests()
    {
       while(tests--)
       {
-         int inputLines, outputLines;
+         int inputLines = -1, outputLines = -1;
          if(file >> inputLines >> outputLines)
          {
             if(inputLines < 0 || outputLines < 0)
@@ -236,6 +240,7 @@ void CParserCommand::readTests()
             }
             tTest test;
             bool flag = false;
+            ++inputLines;
             while(inputLines--)
             {
                std::string buffer;
@@ -243,6 +248,7 @@ void CParserCommand::readTests()
                {
                   wrongFormat = true;
                   tests = 0;
+                  outputLines = 0;
                   break;
                }
                if(flag)
@@ -287,6 +293,7 @@ void CParserCommand::readTests()
    if(wrongFormat)
    {
       emit log(" [ Error ] wrong format of tests.data file, check parser logic\n");
+      emit finished(0);
    }
    else
    {

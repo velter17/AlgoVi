@@ -31,9 +31,15 @@ inline bool validateNum(const QString& n)
    return n.length() < 9;
 }
 
+inline bool validateTests(const tRange& range, int tests)
+{
+   return range.first > 0 && range.first <= tests &&
+          range.second > 0 && range.second <= tests;
+}
+
 inline bool validateRange(const tRange& range, int tests)
 {
-   return range.first > 0 && range.second <= tests;
+   return range.first > 0 && range.second <= tests && range.first <= range.second;
 }
 
 inline bool validateList(const tList& list, int tests)

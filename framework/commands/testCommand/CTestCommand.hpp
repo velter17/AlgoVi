@@ -14,11 +14,15 @@
 namespace NCommand
 {
 
+class CTestCreator;
+
 class CTestCommand : public CTerminalCommandBase
 {
 public: // methods
     CTestCommand();
     void run() override;
+    void appendData(const QString& str) override;
+    void terminate() override;
     void setArgs(const QStringList& args) override;
 
 private: // methods
@@ -27,9 +31,15 @@ private: // methods
     void printTests(const tList& list);
     void printTest(int idx);
 
+    void deleteTests();
+    void createTest();
+    void swapTests();
+    void moveTest();
+
 private: // fields
     QStringList mArgs;
     boost::program_options::variables_map mVarMap;
+    std::shared_ptr <CTestCreator> mTestCreator;
 };
 
 } // namespace NCommand

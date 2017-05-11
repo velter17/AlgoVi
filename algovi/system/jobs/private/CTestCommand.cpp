@@ -39,12 +39,12 @@ void CTestCommand::run(const QStringList& args)
 
 void CTestCommand::appendData(const QString &data)
 {
-
+   mProc->appendData(data);
 }
 
 void CTestCommand::terminate()
 {
-
+   mProc->terminate();
 }
 
 QStringList CTestCommand::getArguments()

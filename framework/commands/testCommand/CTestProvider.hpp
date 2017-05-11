@@ -23,7 +23,12 @@ public: // methods
     void addTest(const tTest& test);
     const tTest& getTest(int idx);
     void erase(int idx);
+    void erase(int from, int to);
+    void swap(int a, int b);
+    void move(int from, int to);
     std::size_t size();
+    void clear();
+    bool empty();
 private: // methods
     CTestProvider();
     CTestProvider(const CTestProvider&) = delete;

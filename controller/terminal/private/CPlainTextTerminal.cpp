@@ -206,6 +206,15 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent 
        mWidget->pressKeyDefault(e);
    }
 
+   /* enter + ctrl */
+   if((e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) &&
+       e->modifiers() == Qt::ControlModifier)
+   {
+      mInputBuffer += "\n";
+      displayHtmlText("<br>");
+      mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
+   }
+
    /* enter */
    if((e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) &&
       (e->modifiers() == Qt::NoModifier ||
