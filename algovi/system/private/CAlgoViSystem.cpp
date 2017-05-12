@@ -23,7 +23,7 @@ CAlgoViSystem::CAlgoViSystem(NController::CController* controller)
 
 void CAlgoViSystem::executeCommand(const QString& command)
 {
-   QStringList args = command.split(" ");
+   QStringList args = command.split(QRegExp("\\s+"), QString::SkipEmptyParts);
    mJobPtr = mCommandHandler.getJob(*args.begin());
    connect(mJobPtr.get(), &IJob::started, [this](){
 //      mControllerPtr->handleLog("[job started]\n");
@@ -35,7 +35,7 @@ void CAlgoViSystem::executeCommand(const QString& command)
    mJobPtr->run(args);
 }
 
-void CAlgoViSystem::appendData(const QString &data)
+void CAlgoViSystem::appendData(const QString& data)
 {
    assert(mJobPtr != 0);
 

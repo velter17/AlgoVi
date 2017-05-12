@@ -292,8 +292,14 @@ void CPlainTextTerminal::tabKeyHandler()
              toAppend = hints.first().mid(lastWordLen, lcp-lastWordLen);
          }
       }
+      while(!mInputBuffer.isEmpty() && mInputBuffer.endsWith(' '))
+      {
+         qDebug () << "mInputBuffer has space: " << mInputBuffer;
+         mInputBuffer.chop(1);
+         mWidget->textCursor().deletePreviousChar();
+      }
       mInputBuffer += toAppend;
-      displayHtmlText(toAppend);
+      displayHtmlText(convertTextToHtml(toAppend));
    }
    mTabPressCount = 0;
 }

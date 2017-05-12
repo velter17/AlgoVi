@@ -106,6 +106,12 @@ QString get_file_name(const QString& file)
     return QString::fromStdString(p.stem().string());
 }
 
+QString get_full_file_name(const QString &file)
+{
+   fs::path p = get_absolute_path(file);
+   return QString::fromStdString(p.filename().string());
+}
+
 QString get_file_extension(const QString& file)
 {
     fs::path p = get_absolute_path(file);

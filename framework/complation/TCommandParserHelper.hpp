@@ -74,7 +74,7 @@ inline QStringList filesystemComplation(const QString& arg, int& lastWordLen)
    else
    {
       QString filePath = NFileSystem::get_file_path(arg);
-      QString fileName = NFileSystem::get_file_name(arg);
+      QString fileName = NFileSystem::get_full_file_name(arg);
       QStringList ret = processHint(NFileSystem::content_list(filePath), fileName, false);
       if(ret.size() == 1)
       {
