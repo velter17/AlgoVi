@@ -27,7 +27,7 @@ fs::path get_absolute_path(const QString& path)
     fs::path ret = fs::absolute(p, CWorkingDir::getInstance().getCurrentPath());
     if(!fs::exists(ret))
     {
-        qDebug () << "does not exist";
+        qDebug () << QString::fromStdString(ret.string()) << " does not exist";
     }
     return ret;
 }

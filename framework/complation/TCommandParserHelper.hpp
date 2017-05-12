@@ -25,7 +25,9 @@ inline int isArgument(const QString& cmd)
    return cmd.length() > 1 && cmd.mid(0, 2) == "--";
 }
 
-inline QStringList processHint(const QStringList& list, const QString& arg)
+inline QStringList processHint(const QStringList& list,
+                               const QString& arg,
+                               bool needEndedSpace = true)
 {
    QStringList ret;
    for(const QString& s : list)
@@ -40,6 +42,10 @@ inline QStringList processHint(const QStringList& list, const QString& arg)
       QString s = *ret.begin();
       ret.clear();
       ret.push_back(s.mid(arg.length()));
+      if(needEndedSpace)
+      {
+         ret.last().append(' ');
+      }
    }
    return ret;
 }
@@ -52,9 +58,16 @@ inline QStringList filesystemComplation(const QString& arg, int& lastWordLen)
    {
        lastWordLen = 0;
        QStringList ret = NFileSystem::content_list(arg);
-       if(ret.size() == 1 && NFileSystem::is_directory(path + "/" + ret.first()))
+       if(ret.size() == 1)
        {
-          ret.first().append('/');
+          if(NFileSystem::is_directory(path + "/" + ret.first()))
+          {
+             ret.first().append('/');
+          }
+          else
+          {
+             ret.first().append(' ');
+          }
        }
        return ret;
    }
@@ -62,10 +75,17 @@ inline QStringList filesystemComplation(const QString& arg, int& lastWordLen)
    {
       QString filePath = NFileSystem::get_file_path(arg);
       QString fileName = NFileSystem::get_file_name(arg);
-      QStringList ret = processHint(NFileSystem::content_list(filePath), fileName);
-      if(ret.size() == 1 && NFileSystem::is_directory(arg + ret.first()))
+      QStringList ret = processHint(NFileSystem::content_list(filePath), fileName, false);
+      if(ret.size() == 1)
       {
-          ret.first().append('/');
+          if(NFileSystem::is_directory(arg + ret.first()))
+          {
+             ret.first().append('/');
+          }
+          else
+          {
+             ret.first().append(' ');
+          }
       }
       lastWordLen = fileName.length();
       return ret;
