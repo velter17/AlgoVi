@@ -12,12 +12,15 @@
 #include "framework/commands/CCompiler.hpp"
 #include "framework/filesystem/filesystem.hpp"
 #include "framework/commands/ProcessHelper.hpp"
+#include "framework/commands/testCommand/CTestProvider.hpp"
 
 namespace NCommand
 {
 
 CAppExecutor::CAppExecutor()
+   : mOutputType(OutputType::NoSpecified)
 {
+    qDebug () << "CAppExecutor constructor started";
     mOptions.add_options()
         ("src,s", boost::program_options::value <std::string>()->required(),
             "source file for execution")
@@ -34,9 +37,17 @@ CAppExecutor::CAppExecutor()
         ("input,i", boost::program_options::value <std::string>(),
             "input file path")
         ("output,o", boost::program_options::value <std::string>(),
-            "output file path");
+            "output file path")
+        ("test,t", boost::program_options::value <int>(), "run on test")
+        ("time-limit", boost::program_options::value<int>(), "execute no more then [value in ms]");
 //        ("test-save", boost::program_options::bool_switch(),
-//            "save test after execution");
+    //            "save test after execution");
+    qDebug () << "CAppExecutor constructor finished";
+}
+
+CAppExecutor::~CAppExecutor()
+{
+    qDebug () << "~CAppExecutor " << mArgs;
 }
 
 void CAppExecutor::run()
@@ -76,6 +87,8 @@ void CAppExecutor::run()
                 QString::fromStdString(varMap["output"].as<std::string>())).toStdString();
     }
 
+    mTestToRun = varMap.count("test") ? varMap["test"].as<int>() : -1;
+
     compileCode(codePath, flags, args, language);
 }
 
@@ -98,6 +111,18 @@ void CAppExecutor::terminate()
     qDebug () << "CAppExecutor::terminate()";
     disconnect(mErrorConnection);
     mProcess->terminate();
+}
+
+void CAppExecutor::setOutputType(OutputType::EType type)
+{
+   mOutputType = type;
+}
+
+QString CAppExecutor::getOutput()
+{
+    qDebug () << "CAppExecutor::getOutput()";
+    qDebug () << mOutputStorage;
+    return mOutputStorage;
 }
 
 void CAppExecutor::compileCode(const QString& codePath,
@@ -129,6 +154,7 @@ void CAppExecutor::compileCode(const QString& codePath,
 
 void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
 {
+    qDebug () << "CAppExecutor::runApp " << appPath << " " << args;
     if(!mOutputFilePath.empty())
     {
         mOutputFile.open(mOutputFilePath);
@@ -139,9 +165,24 @@ void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
             emit finished(1);
             return;
         }
+        mOutputType = OutputType::ToFile;
+    }
+    else if(mOutputType == OutputType::NoSpecified)
+    {
+        mOutputType = OutputType::JustEmit;
     }
     QString inputData;
-    if(!mInputFilePath.empty())
+    if(mTestToRun != -1)
+    {
+       if(CTestProvider::getInstance().size() < mTestToRun)
+       {
+          emit error(" [ Error ] wrong test to run\n");
+          emit finished(1);
+          return;
+       }
+       inputData = CTestProvider::getInstance().getTest(mTestToRun-1).first + "\n";
+    }
+    else if(!mInputFilePath.empty())
     {
        std::ifstream file(mInputFilePath);
        if(!file.is_open())
@@ -162,36 +203,43 @@ void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
     connect(mProcess, &QProcess::readyReadStandardOutput, [this](){
        QString msg = mProcess->readAllStandardOutput();
        qDebug () << "mProcess log " << msg;
-       if(mOutputFilePath.empty())
+       if(mOutputType == OutputType::JustEmit)
        {
-           emit log(msg);
+          emit log(msg);
        }
-       else
+       else if(mOutputType == OutputType::ToFile)
        {
-           mOutputFile << msg.toStdString();
+          mOutputFile << msg.toStdString();
+       }
+       else if(mOutputType == OutputType::ToStorage)
+       {
+          mOutputStorage += msg;
        }
     });
     connect(mProcess, &QProcess::readyReadStandardError, [this](){
-       emit error(mProcess->readAllStandardError());
+        qDebug () << "mProcess readyReadStandardError";
+        emit error(mProcess->readAllStandardError());
     });
     mProcess->setWorkingDirectory(mWorkingDirectory);
 
     connect(mProcess, static_cast<void(QProcess::*)(int)>(&QProcess::finished),
             [this](int code)
     {
-       emit finished(code);
-       mProcess->deleteLater();
-       mProcess = nullptr;
-    });
-    //mErrorConnection = connect(mProcess, &QProcess::errorOccurred, [this](QProcess::ProcessError err){
-    mErrorConnection = connect(mProcess, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
-                               [this](QProcess::ProcessError err){
-        emit error(processErrorToStr(err) + "\n");
-        emit finished(1);
+        qDebug () << "CAppExecutor: mProcess finished with code " << code;
         mProcess->deleteLater();
         mProcess = nullptr;
+        emit finished(code);
+    });
+    mErrorConnection = connect(mProcess, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
+                               [this](QProcess::ProcessError err){
+        qDebug () << "CAppExecutor: mProcess emitted error" << processErrorToStr(err);
+        emit error(processErrorToStr(err) + "\n");
+        mProcess->deleteLater();
+        mProcess = nullptr;
+        emit finished(1);
     });
 
+    qDebug () << "start " << appPath << ", args: " << args;
     mProcess->start(appPath, args, QProcess::Unbuffered | QProcess::ReadWrite);
     mProcess->waitForStarted();
     if(!inputData.isEmpty())

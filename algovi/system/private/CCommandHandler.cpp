@@ -19,6 +19,7 @@
 #include "algovi/system/jobs/CChangeDirCommand.hpp"
 #include "algovi/system/jobs/CTestCommand.hpp"
 #include "algovi/system/jobs/CParserCommand.hpp"
+#include "algovi/system/jobs/CTesterJob.hpp"
 #include "controller/CController.hpp"
 #include "../CCommandHandler.hpp"
 
@@ -38,6 +39,7 @@ CCommandHandler::CCommandHandler(NController::CController* controller)
    mCommandMap.insert("run",                 CommandType::ExecuteApp);
    mCommandMap.insert("test",                CommandType::Test);
    mCommandMap.insert("parse",               CommandType::ParseTests);
+   mCommandMap.insert("tester",              CommandType::Tester);
 
    for(const QString& cmd : CInternalSystemCommand::getCommandList())
    {
@@ -117,6 +119,12 @@ template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::ParseTests>()
 {
    return std::make_shared<CParserCommand>(mControllerPtr);
+}
+
+template <>
+std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::Tester>()
+{
+   return std::make_shared<CTesterJob>(mControllerPtr);
 }
 
 std::shared_ptr<IJob> CCommandHandler::getJob(const QString& cmd)

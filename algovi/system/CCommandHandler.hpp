@@ -36,6 +36,7 @@ struct CommandType
       ExecuteApp,
       Test,
       ParseTests,
+      Tester,
 
       Total,
    };

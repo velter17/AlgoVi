@@ -35,6 +35,7 @@ public: // types
     };
 public: // methods
     CCompiler(const std::vector <SCompilerTask>& tasks);
+    ~CCompiler();
     void run() override;
     std::vector <QString> getResult();
 

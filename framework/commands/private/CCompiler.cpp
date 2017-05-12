@@ -24,6 +24,11 @@ CCompiler::CCompiler(const std::vector<SCompilerTask>& tasks)
     }
 }
 
+CCompiler::~CCompiler()
+{
+   qDebug () << "~CCompiler()";
+}
+
 void CCompiler::run()
 {
     emit started();
@@ -51,6 +56,7 @@ void CCompiler::compile(int index)
         emit error(msg);
     });
     connect(executor, &CCompilerExecutor::finished, [this, index, executor](const QString& appPath){
+        executor->deleteLater();
         if(appPath.isEmpty())
         {
             emit finished(1);
@@ -60,7 +66,6 @@ void CCompiler::compile(int index)
             mResult.push_back(appPath);
             compile(index+1);
         }
-        executor->deleteLater();
     });
     executor->compile(mTasks[index].mCodePath, mTasks[index].mFlags, mTasks[index].mLanguage, mTasks[index].mForced);
 }

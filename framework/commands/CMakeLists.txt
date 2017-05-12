@@ -15,14 +15,21 @@ set ( TERMINAL_COMMANDS_LIB_SOURCES
     "private/CCompiler.cpp"
     "private/CCompilerExecutor.hpp"
     "private/CCompilerExecutor.cpp"
+
     "testCommand/CTestProvider.hpp"
     "testCommand/private/CTestProvider.cpp"
     "testCommand/CTestCommand.hpp"
     "testCommand/private/CTestCommand.cpp"
     "testCommand/TableDrawer.hpp"
     "testCommand/TestCommandHelper.hpp"
+
     "parser/CParserCommand.hpp"
     "parser/private/CParserCommand.cpp"
+
+    "tester/CTesterCommand.hpp"
+    "tester/private/CTesterCommand.cpp"
+    "tester/private/CTesterImpl.hpp"
+    "tester/private/CTesterImpl.cpp"
     )
 
 add_library ( ${TERMINAL_COMMANDS_LIB_NAME} STATIC ${TERMINAL_COMMANDS_LIB_SOURCES} )

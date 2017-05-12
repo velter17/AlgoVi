@@ -25,6 +25,7 @@ bool exists(const QString& dir);
 
 bool is_full_path(const QString& path);
 QString get_full_path(const QString& path);
+QString get_full_system_path(const QString& path);
 
 QString get_file_name(const QString& file);
 QString get_full_file_name(const QString& file);

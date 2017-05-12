@@ -24,13 +24,18 @@ CAlgoViSystem::CAlgoViSystem(NController::CController* controller)
 void CAlgoViSystem::executeCommand(const QString& command)
 {
    QStringList args = command.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+   if(args.empty())
+   {
+      args << "";
+   }
    mJobPtr = mCommandHandler.getJob(*args.begin());
    connect(mJobPtr.get(), &IJob::started, [this](){
 //      mControllerPtr->handleLog("[job started]\n");
    });
    connect(mJobPtr.get(), &IJob::finished, [this](){
 //      mControllerPtr->handleLog("[job finished]\n");
-      emit finishedCommand();
+       emit finishedCommand();
+       mJobPtr.reset();
    });
    mJobPtr->run(args);
 }

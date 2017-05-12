@@ -106,6 +106,17 @@ QString get_file_name(const QString& file)
     return QString::fromStdString(p.stem().string());
 }
 
+QString get_full_system_path(const QString& path)
+{
+   fs::path p = path.toStdString();
+   fs::path ret = fs::absolute(p);
+   if(!fs::exists(ret))
+   {
+       qDebug () << QString::fromStdString(ret.string()) << " does not exist";
+   }
+   return QString::fromStdString(ret.string());
+}
+
 QString get_full_file_name(const QString &file)
 {
    fs::path p = get_absolute_path(file);

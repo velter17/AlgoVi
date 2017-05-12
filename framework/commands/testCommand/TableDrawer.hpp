@@ -10,6 +10,7 @@
 
 #include <QString>
 #include <vector>
+#include <iostream>
 
 namespace
 {
@@ -42,6 +43,10 @@ enum class TAlign
 
 class CCell
 {
+public: // methods
+   CCell()
+      : mAlign(TAlign::Left), mColor("#ffffff"), mCollspan(1)
+   {}
 #define ADD_ATTRIBUTE(name, type) \
    public: \
       const type& get##name() const \
@@ -57,6 +62,7 @@ class CCell
 ADD_ATTRIBUTE(Align, TAlign)
 ADD_ATTRIBUTE(Color, QString)
 ADD_ATTRIBUTE(Data, std::vector <QString>)
+ADD_ATTRIBUTE(Collspan, int)
 #undef ADD_ATTRIBUTE
 
 public: // methods
@@ -69,26 +75,84 @@ inline QString toHtmlSymbol(int code)
    return "&#" + QString::number(code) + ";";
 }
 
+inline std::vector <std::vector <int>> getCellsWidth(const std::vector <std::vector <CCell>>& table)
+{
+   std::vector <std::vector <int> > ret(table.size());
+   for(std::size_t i = 0; i < table.size(); ++i)
+   {
+      ret[i].resize(table[i].size(), 0);
+   }
+   std::vector <std::size_t> ptr(table.size(), 0);
+   std::vector <int> cells(table.size());
+   int completed = 0;
+   for(int cell = 1; completed < table.size(); ++cell)
+   {
+      int mx = 0;
+      for(std::size_t i = 0; i < table.size(); ++i)
+      {
+         if(ptr[i] == table[i].size())
+         {
+            continue;
+         }
+         if(cells[i] + table[i][ptr[i]].getCollspan() == cell)
+         {
+            int needAdd = std::max(0, table[i][ptr[i]].width() + 2 - ret[i][ptr[i]]);
+            mx = std::max(mx, needAdd);
+         }
+      }
+      for(std::size_t i = 0; i < table.size(); ++i)
+      {
+         if(ptr[i] == table[i].size())
+         {
+            continue;
+         }
+         ret[i][ptr[i]] += mx;
+         if(cells[i] + table[i][ptr[i]].getCollspan() == cell)
+         {
+            cells[i] = cell;
+            ++ptr[i];
+            if(ptr[i] == ret[i].size())
+            {
+               ++completed;
+            }
+         }
+      }
+   }
+
+   for(std::size_t i = 0; i < ret.size(); ++i)
+   {
+      for(std::size_t j = 0; j < ret[i].size(); ++j)
+      {
+         ret[i][j] += table[i][j].getCollspan() - 1;
+      }
+   }
+
+   return ret;
+}
+
 inline QString getHtmlTable(const std::vector <std::vector <CCell>>& table, QString borderColor = "#ffffff")
 {
     QString ret = "<font color=" + borderColor + ">";
-    std::vector <int> w(table.back().size());
     std::vector <int> h(table.size());
     for(std::size_t i = 0; i < table.size(); ++i)
     {
         for(std::size_t j = 0; j < table[i].size(); ++j)
         {
-            w[j] = std::max(w[j], int(table[i][j].width()) + 2);
             h[i] = std::max(h[i], int(table[i][j].height()));
         }
     }
-    int width = 1 + w.size();
-    for(std::size_t i = 0; i < w.size(); ++i)
+
+    std::vector <std::vector <int>> cellswidth = getCellsWidth(table);
+    for(int i = 0; i < cellswidth.size(); ++i)
     {
-        width += w[i];
+       for(int j = 0; j < cellswidth[i].size(); ++j)
+       {
+          std::cout << cellswidth[i][j] << " ";
+       }
+       std::cout << std::endl;
     }
 
-    auto drawTop = [&w, &ret]()
+    auto drawTop = [&ret](const std::vector <int>& w)
     {
        ret += toHtmlSymbol(LUBORDER);
        for(std::size_t i = 0; i < w.size(); ++i)
@@ -106,25 +170,63 @@ inline QString getHtmlTable(const std::vector <std::vector <CCell>>& table, QStr
        ret += "<br>";
     };
 
-    auto drawMid = [&w, &ret]()
+    auto drawMid = [&ret](const std::vector <int>& w, const std::vector <int>& nxt)
     {
-       ret += toHtmlSymbol(BORDERRIGHT);
-       for(std::size_t i = 0; i < w.size(); ++i)
+       std::vector <int> pt {0};
+       int sumw = 0, sumnxt = 0;
+       for(int t : w)
        {
-          ret += toHtmlSymbol(HORBORDER).repeated(w[i]);
-          if(i == w.size()-1)
+          sumw += t+1;
+          pt.push_back(sumw);
+       }
+       for(int t : nxt)
+       {
+          sumnxt += t+1;
+          pt.push_back(sumnxt);
+       }
+       std::sort(pt.begin(), pt.end());
+       int cnt = std::unique(pt.begin(), pt.end()) - pt.begin();
+       pt.resize(cnt);
+       std::cout << "pt: ";
+       for(int t : pt)
+       {
+          std::cout << t << " ";
+       }
+       std::cout << std::endl;
+       ret += toHtmlSymbol(BORDERRIGHT);
+       std::size_t ptrw = 0, ptrnxt = 0;
+       sumw = 0, sumnxt = 0;
+       for(std::size_t i = 1; i < pt.size(); ++i)
+       {
+          ret += toHtmlSymbol(HORBORDER).repeated(pt[i] - pt[i - 1] - 1);
+          if(i == pt.size()-1)
           {
              ret += toHtmlSymbol(BORDERLEFT);
           }
           else
           {
-             ret += toHtmlSymbol(PLUSBORDER);
+             if(sumw + w[ptrw] > pt[i])
+             {
+                ret += toHtmlSymbol(BORDERBOTTOM);
+                sumnxt += nxt[ptrnxt++];
+             }
+             else if(sumnxt + nxt[ptrnxt] > pt[i])
+             {
+                ret += toHtmlSymbol(BORDERUP);
+                sumw += w[ptrw++];
+             }
+             else
+             {
+                sumw += w[ptrw++];
+                sumnxt += nxt[ptrnxt++];
+                ret += toHtmlSymbol(PLUSBORDER);
+             }
           }
        }
        ret += "<br>";
     };
 
-    auto drawBottom = [&w, &ret]()
+    auto drawBottom = [&ret](const std::vector <int>& w)
     {
        ret += toHtmlSymbol(LBBORDER);
        for(std::size_t i = 0; i < w.size(); ++i)
@@ -167,7 +269,7 @@ inline QString getHtmlTable(const std::vector <std::vector <CCell>>& table, QStr
        }
     };
 
-    drawTop();
+    drawTop(cellswidth.front());
     for(std::size_t i = 0; i < table.size(); ++i)
     {
        for(int idx = 0; idx < h[i]; ++idx)
@@ -175,12 +277,12 @@ inline QString getHtmlTable(const std::vector <std::vector <CCell>>& table, QStr
           ret += toHtmlSymbol(VERBORDER);
           for(std::size_t j = 0; j < table[i].size(); ++j)
           {
-             drawCellPart(table[i][j], w[j], idx);
+             drawCellPart(table[i][j], cellswidth[i][j], idx);
              ret += toHtmlSymbol(VERBORDER);
           }
           ret += "<br>";
        }
-       i == table.size()-1 ? drawBottom() : drawMid();
+       i == table.size()-1 ? drawBottom(cellswidth.back()) : drawMid(cellswidth[i], cellswidth[i+1]);
     }
 
     return ret + "</font>";
