@@ -9,6 +9,12 @@
 17. executor save test
 18. provide test lib checkers
 19. tester command
-+20. problems parser
-21. test command improvement
-
++ 20. problems parser
++ 21. test command improvement
+22. rw tests into files
+23. executor runs on tests
++ 24. parser with defaults
+25. test command handle long tests
+26. ability to edit tests
++ 27. complation with spaces
++ 28. handle wrong spaces in complation
