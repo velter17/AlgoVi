@@ -39,4 +39,4 @@ add_subdirectory ( "algovi" )
 add_subdirectory ( "framework" )
 add_subdirectory ( "gui" )
 add_subdirectory ( "controller" )
-
+add_subdirectory ( "externalLibs" )
