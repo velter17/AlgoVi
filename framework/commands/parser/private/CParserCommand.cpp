@@ -89,8 +89,15 @@ void CParserCommand::run()
        return;
    }
    mUrl = QString::fromStdString(varMap["url"].as<std::string>());
-   mParserPath = NFileSystem::get_full_path(
-            QString::fromStdString(varMap["parser"].as<std::string>()));
+   if(varMap.count("parser"))
+   {
+      mParserPath = NFileSystem::get_full_path(
+         QString::fromStdString(varMap["parser"].as<std::string>()));
+   }
+   else
+   {
+      mParserPath = getParserByUrl();
+   }
    compileParser();
 }
 
@@ -111,6 +118,21 @@ void CParserCommand::terminate()
    if(mProc != nullptr)
    {
       mProc->terminate();
+   }
+}
+
+QString CParserCommand::getParserByUrl()
+{
+   // TODO : default parsers in config
+   if(mUrl.contains("codeforces"))
+   {
+      emit log(" [ Info ] default parser : codeforces\n");
+      return "parsers/algovi_codeforcesParser";
+   }
+   else
+   {
+      emit log(" [ Error ] no default parsers for this source\n");
+      return "no_parser";
    }
 }
 

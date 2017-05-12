@@ -29,6 +29,7 @@ public: // methods
     void terminate() override;
 
 private slots: // methods
+    QString getParserByUrl();
     void readUrl(int tries = 0);
     void compileParser();
     void parseTests(const QString& htmlContent);
