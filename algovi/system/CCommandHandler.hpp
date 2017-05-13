@@ -35,6 +35,7 @@ struct CommandType
       ChangeDir,
       ExecuteApp,
       Test,
+      TestRead,
       ParseTests,
       Tester,
 

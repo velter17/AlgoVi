@@ -23,6 +23,7 @@
 #include "framework/commands/CPythonShell.hpp"
 #include "framework/commands/parser/CParserCommand.hpp"
 #include "framework/commands/testCommand/CTestCommand.hpp"
+#include "framework/commands/testCommand/CTestReader.hpp"
 #include "framework/commands/tester/CTesterCommand.hpp"
 
 namespace NAlgoVi
@@ -40,6 +41,7 @@ CCommandHandler::CCommandHandler(NController::CController* controller)
    mCommandMap.insert("cd",                  CommandType::ChangeDir);
    mCommandMap.insert("run",                 CommandType::ExecuteApp);
    mCommandMap.insert("test",                CommandType::Test);
+   mCommandMap.insert("test-read",           CommandType::TestRead);
    mCommandMap.insert("parse",               CommandType::ParseTests);
    mCommandMap.insert("tester",              CommandType::Tester);
 
@@ -115,6 +117,12 @@ template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::Test>()
 {
    return std::make_shared<CJobBase<NCommand::CTestCommand>>(mControllerPtr);
+}
+
+template <>
+std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::TestRead>()
+{
+   return std::make_shared<CJobBase<NCommand::CTestReader>>(mControllerPtr);
 }
 
 template <>

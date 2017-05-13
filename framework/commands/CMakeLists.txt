@@ -22,6 +22,8 @@ set ( TERMINAL_COMMANDS_LIB_SOURCES
     "testCommand/private/CTestCommand.cpp"
     "testCommand/TableDrawer.hpp"
     "testCommand/TestCommandHelper.hpp"
+    "testCommand/CTestReader.hpp"
+    "testCommand/private/CTestReader.cpp"
 
     "parser/CParserCommand.hpp"
     "parser/private/CParserCommand.cpp"

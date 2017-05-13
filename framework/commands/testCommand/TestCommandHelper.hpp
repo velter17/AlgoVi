@@ -51,7 +51,7 @@ inline bool validateList(const tList& list, int tests)
          return false;
       }
    }
-   return true;
+   return !list.empty();
 }
 
 inline tRange parseRange(const QString& str)
@@ -97,6 +97,32 @@ inline tList parseList(const QString& str)
       ret.push_back(s.toInt());
    }
    return ret;
+}
+
+
+inline std::pair<std::string, std::string> parsePatternStr(const std::string& p)
+{
+   if(p.length() < 3 || p.back() != ')')
+   {
+      return {"",""};
+   }
+   int bar = p.length()-2;
+   while(bar >= 0 && p[bar] != '|')
+   {
+      --bar;
+   }
+   int br = bar;
+   while(br >= 0 && p[br] != '(')
+   {
+      --br;
+   }
+   if(bar == -1 || br == -1)
+   {
+      return {"", ""};
+   }
+   std::string inputExt = p.substr(br + 1, bar - br - 1);
+   std::string outputExt = p.substr(bar + 1, p.length() - bar - 2);
+   return {p.substr(0, br) + inputExt, p.substr(0, br) + outputExt};
 }
 
 } // namespace NCommand
