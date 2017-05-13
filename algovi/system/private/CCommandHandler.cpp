@@ -9,19 +9,21 @@
 #include <QStringList>
 #include <QDebug>
 
-#include "algovi/system/jobs/CAppExecutor.hpp"
+#include "algovi/system/CCommandHandler.hpp"
 #include "algovi/system/jobs/CEmptyJob.hpp"
 #include "algovi/system/jobs/CJobForTest.hpp"
 #include "algovi/system/jobs/CExitCommandJob.hpp"
 #include "algovi/system/jobs/CWrongCommandJob.hpp"
-#include "algovi/system/jobs/CPythonInterpreter.hpp"
 #include "algovi/system/jobs/CInternalSystemCommand.hpp"
 #include "algovi/system/jobs/CChangeDirCommand.hpp"
-#include "algovi/system/jobs/CTestCommand.hpp"
-#include "algovi/system/jobs/CParserCommand.hpp"
-#include "algovi/system/jobs/CTesterJob.hpp"
+#include "algovi/system/jobs/CPythonInterpreter.hpp"
+#include "algovi/system/jobs/CJobBase.hpp"
 #include "controller/CController.hpp"
-#include "../CCommandHandler.hpp"
+#include "framework/commands/CAppExecutor.hpp"
+#include "framework/commands/CPythonShell.hpp"
+#include "framework/commands/parser/CParserCommand.hpp"
+#include "framework/commands/testCommand/CTestCommand.hpp"
+#include "framework/commands/tester/CTesterCommand.hpp"
 
 namespace NAlgoVi
 {
@@ -106,25 +108,25 @@ std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::ChangeDir>()
 template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::ExecuteApp>()
 {
-   return std::make_shared<CAppExecutor>(mControllerPtr);
+   return std::make_shared<CJobBase<NCommand::CAppExecutor>>(mControllerPtr);
 }
 
 template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::Test>()
 {
-   return std::make_shared<CTestCommand>(mControllerPtr);
+   return std::make_shared<CJobBase<NCommand::CTestCommand>>(mControllerPtr);
 }
 
 template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::ParseTests>()
 {
-   return std::make_shared<CParserCommand>(mControllerPtr);
+   return std::make_shared<CJobBase<NCommand::CParserCommand>>(mControllerPtr);
 }
 
 template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::Tester>()
 {
-   return std::make_shared<CTesterJob>(mControllerPtr);
+   return std::make_shared<CJobBase<NCommand::CTesterCommand>>(mControllerPtr);
 }
 
 std::shared_ptr<IJob> CCommandHandler::getJob(const QString& cmd)
@@ -149,7 +151,6 @@ void CCommandHandler::makeComplationProvider()
         }
         else
         {
-            qDebug () << "addCommand " << key << " " << job->getArguments();
             ret->addCommand(key, job->getArguments());
         }
     }
