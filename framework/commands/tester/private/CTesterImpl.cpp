@@ -89,6 +89,10 @@ void CTesterImpl::check(const tTest& test)
     {
         args << "--arg" << itr.first;
     }
+    if(mJob.getCustomChecker())
+    {
+        args << "--output" << filesVec.back().first;
+    }
     mExecutor->setArgs(args);
     connect(mExecutor, &CAppExecutor::finished, [this, filesVec](int code){
         qDebug () << "checker finished with code " << code;

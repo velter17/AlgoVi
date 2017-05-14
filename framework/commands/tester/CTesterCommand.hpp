@@ -46,6 +46,7 @@ private: // fields
     bool mVerboseFlag;
     CTesterImpl* mTesterImpl;
     int mAcceptedTests;
+    bool mCustomChecker;
 };
 
 } // namespace NCommand

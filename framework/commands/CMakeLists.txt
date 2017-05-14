@@ -24,6 +24,8 @@ set ( TERMINAL_COMMANDS_LIB_SOURCES
     "testCommand/TestCommandHelper.hpp"
     "testCommand/CTestReader.hpp"
     "testCommand/private/CTestReader.cpp"
+    "testCommand/CTestWriter.hpp"
+    "testCommand/private/CTestWriter.cpp"
 
     "parser/CParserCommand.hpp"
     "parser/private/CParserCommand.cpp"

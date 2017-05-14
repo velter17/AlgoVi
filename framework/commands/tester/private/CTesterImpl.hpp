@@ -39,6 +39,7 @@ ADD_ATTRIBUTE(CTesterJob, AppPath, QString)
 ADD_ATTRIBUTE(CTesterJob, CheckerPath, QString)
 ADD_ATTRIBUTE(CTesterJob, TimeLimit, uint32_t)
 ADD_ATTRIBUTE(CTesterJob, TestNumber, uint32_t)
+ADD_ATTRIBUTE(CTesterJob, CustomChecker, bool)
 ADD_ATTRIBUTE(CTesterJob, Verbose, bool)
 };
 

@@ -36,6 +36,7 @@ struct CommandType
       ExecuteApp,
       Test,
       TestRead,
+      TestWrite,
       ParseTests,
       Tester,
 

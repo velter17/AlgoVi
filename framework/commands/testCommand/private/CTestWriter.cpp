@@ -1,39 +1,41 @@
 /**
  * Project   AlgoVi
  *
- * @file     CTestReader.cpp
+ * @file     CTestWriter.cpp
  * @author   Dmytro Sadovyi
- * @date     13.05.2017
+ * @date     14.05.2017
  */
 
 #include <QDebug>
 #include <QFile>
 
-#include "framework/commands/testCommand/CTestReader.hpp"
+#include "framework/commands/testCommand/CTestWriter.hpp"
 #include "framework/commands/testCommand/TestCommandHelper.hpp"
 #include "framework/filesystem/filesystem.hpp"
 
 namespace NCommand
 {
 
-CTestReader::CTestReader()
+CTestWriter::CTestWriter()
    : mTerminatedFlag(false)
-   , mTestsRead(0)
+   , mTestsWritten(0)
 {
    mOptions.add_options()
       ("folder,f", boost::program_options::value<std::string>()->required(),
-         "source folder")
+         "destination folder")
       ("test,t", boost::program_options::value<std::string>(),
-         "tests for reading")
+         "tests for writing")
       ("pattern", boost::program_options::value<std::string>()->default_value("%1.(dat|ans)"),
          "file names pattern")
       ("num-length", boost::program_options::value<int>()->default_value(3),
          "length of test number (0..9)\n"
          "extra space will be filled by zeroes (003 instead of 3)\n"
-         "if 0 - just number, without zeroes");
+         "if 0 - just number, without zeroes")
+      ("start-from", boost::program_options::value<int>()->default_value(1),
+         "test number (in file name) to start from");
 }
 
-void CTestReader::run()
+void CTestWriter::run()
 {
    emit started();
    boost::program_options::variables_map varMap;
@@ -60,6 +62,14 @@ void CTestReader::run()
       return;
    }
 
+   mStartFrom = varMap["start-from"].as<int>();
+   if(mStartFrom < 0)
+   {
+      emit error(" [ Error ] Wrong number to start. Must be non-negative\n");
+      emit finished(1);
+      return;
+   }
+
    auto patterns = parsePatternStr(varMap["pattern"].as<std::string>());
    if(patterns.first.empty() || patterns.second.empty())
    {
@@ -75,14 +85,14 @@ void CTestReader::run()
 
    if(varMap.count("test"))
    {
-      QString toRead = QString::fromStdString(varMap["test"].as<std::string>());
-      if(toRead[0] == ':')
+      QString toWrite = QString::fromStdString(varMap["test"].as<std::string>());
+      if(toWrite[0] == ':')
       {
-         tList list = parseList(toRead);
+         tList list = parseList(toWrite);
          if(validateList(list, 1000))
          {
             qDebug () << "list " << QVector<int>::fromStdVector(list);
-            readTests(list);
+            writeTests(list);
          }
          else
          {
@@ -93,10 +103,10 @@ void CTestReader::run()
       }
       else
       {
-         tRange range = parseRange(toRead);
+         tRange range = parseRange(toWrite);
          if(validateRange(range, 1000))
          {
-            readTests(range);
+            writeTests(range);
          }
          else
          {
@@ -108,90 +118,70 @@ void CTestReader::run()
    }
    else
    {
-      tRange range(1, 1000);
-      readTests(range);
+      tRange range(1, CTestProvider::getInstance().size());
+      writeTests(range);
    }
 }
 
-void CTestReader::terminate()
+void CTestWriter::terminate()
 {
    mTerminatedFlag = true;
 }
 
-void CTestReader::setArgs(const QStringList &args)
+void CTestWriter::setArgs(const QStringList &args)
 {
    mArgs = args;
 }
 
-tTest CTestReader::readTest(int idx)
+void CTestWriter::writeTest(int idx)
 {
    QString inputPath;
    QString outputPath;
    if(mNumLength == 0)
    {
-      inputPath = mFolder + "/" + mInputPattern.arg(idx);
-      outputPath = mFolder + "/" + mOutputPattern.arg(idx);
+      inputPath = mFolder + "/" + mInputPattern.arg(mStartFrom);
+      outputPath = mFolder + "/" + mOutputPattern.arg(mStartFrom);
    }
    else
    {
-      inputPath = mFolder + "/" + mInputPattern.arg(idx, mNumLength, 10, QChar('0'));
-      outputPath = mFolder + "/" + mOutputPattern.arg(idx, mNumLength, 10, QChar('0'));
+      inputPath = mFolder + "/" + mInputPattern.arg(mStartFrom, mNumLength, 10, QChar('0'));
+      outputPath = mFolder + "/" + mOutputPattern.arg(mStartFrom, mNumLength, 10, QChar('0'));
    }
 
-   if(!NFileSystem::exists(inputPath) || !NFileSystem::exists(outputPath))
-   {
-       return tTest();
-   }
+   ++mStartFrom;
 
-   tTest test;
+   const tTest& test = CTestProvider::getInstance().getTest(idx-1);
    QFile file;
    file.setFileName(inputPath);
-   if(file.open(QFile::ReadOnly))
+   if(file.open(QFile::WriteOnly))
    {
-       test.first = file.readAll();
+       file.write(test.first.toLocal8Bit());
    }
    file.close();
 
    file.setFileName(outputPath);
-   if(file.open(QFile::ReadOnly))
+   if(file.open(QFile::WriteOnly))
    {
-       test.second = file.readAll();
+       file.write(test.second.toLocal8Bit());
    }
-   return test;
 }
 
-void CTestReader::readTests(tRange range)
+void CTestWriter::writeTests(tRange range)
 {
    for(int i = range.first; i <= range.second && !mTerminatedFlag; ++i)
    {
-      tTest test = readTest(i);
-      if(!test.first.isEmpty() && !test.second.isEmpty())
-      {
-         ++mTestsRead;
-         CTestProvider::getInstance().addTest(test);
-      }
-      else
-      {
-          break;
-      }
+      writeTest(i);
+      ++mTestsWritten;
    }
    emit finished(0);
 }
 
-void CTestReader::readTests(const tList &list)
+void CTestWriter::writeTests(const tList &list)
 {
    for(std::size_t i = 0; i < list.size() && !mTerminatedFlag; ++i)
    {
-      tTest test = readTest(list[i]);
-      if(!test.first.isEmpty() && !test.second.isEmpty())
-      {
-         ++mTestsRead;
-         CTestProvider::getInstance().addTest(test);
-      }
-      else
-      {
-          break;
-      }
+      writeTest(list[i]);
+      ++mTestsWritten;
    }
    emit finished(0);
 }

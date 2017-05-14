@@ -190,11 +190,12 @@ void CTesterCommand::compile()
    connect(compiler, &CCompiler::finished, [this, compiler](int code){
       if(code == 0)
       {
-         mAppPath = compiler->getResult()[0];
-         if(!mCheckerPath.isEmpty())
-         {
-            mCheckerAppPath = compiler->getResult()[1];
-         }
+          mAppPath = compiler->getResult()[0];
+          if(!mCheckerPath.isEmpty())
+          {
+              mCheckerAppPath = compiler->getResult()[1];
+          }
+          mCustomChecker = !mCheckerPath.isEmpty();
       }
       compiler->deleteLater();
       emit compilationFinished(code);
@@ -241,6 +242,7 @@ void CTesterCommand::runTest(int idx, std::function<void()> callback)
                                              .setCheckerPath(mCheckerAppPath)
                                              .setTestNumber(idx)
                                              .setVerbose(mVerboseFlag)
+                                             .setCustomChecker(mCustomChecker)
                                              .setTimeLimit(1000000));
    connect(mTesterImpl, &CTesterImpl::finished, [this, callback, idx](const CTesterResult& result){
        if(result.getResult() == TesterResult::Accepted)

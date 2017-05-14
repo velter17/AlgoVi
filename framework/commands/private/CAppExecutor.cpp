@@ -166,6 +166,7 @@ void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
             return;
         }
         mOutputType = OutputType::ToFile;
+        qDebug () << "CAppExecutor output to file " << QString::fromStdString(mOutputFilePath);
     }
     else if(mOutputType == OutputType::NoSpecified)
     {
@@ -226,6 +227,10 @@ void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
             [this](int code)
     {
         qDebug () << "CAppExecutor: mProcess finished with code " << code;
+        if(mOutputType == OutputType::ToFile)
+        {
+            mOutputFile.close();
+        }
         mProcess->deleteLater();
         mProcess = nullptr;
         emit finished(code);
