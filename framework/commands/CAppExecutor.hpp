@@ -64,6 +64,7 @@ private: // fields
     int mTestToRun;
     OutputType::EType mOutputType;
     QString mOutputStorage;
+    bool mDebugMode;
 };
 
 } // namespace NCommand

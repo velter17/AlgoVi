@@ -17,6 +17,7 @@
 #include "controller/terminal/CPlainTextTerminal.hpp"
 #include "controller/terminal/TerminalHelpers.hpp"
 #include "controller/terminal/private/CPlainTextTerminalImpl.hpp"
+#include "framework/common/HtmlConverter.hpp"
 
 namespace NController
 {
@@ -26,7 +27,7 @@ QColor CPlainTextTerminal::Colors::Background =
 QColor CPlainTextTerminal::Colors::Main =
         QColor(Qt::green);
 QColor CPlainTextTerminal::Colors::Error =
-        QColor(Qt::red);
+        "#ff3333";
 QColor CPlainTextTerminal::Colors::Output =
         QColor(Qt::white);
 
@@ -60,7 +61,7 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent
     {
         setWriter(WriterType::User);
         mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
-        displayHtmlText(convertTextToHtml(e->text()));
+        displayHtmlText(NCommon::convertToHtml(e->text()));
         mInputBuffer += e->text();
     }
 
@@ -70,7 +71,7 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent
         setWriter(WriterType::User);
         mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
         QClipboard *clipboard = QApplication::clipboard();
-        displayHtmlText(convertTextToHtml(clipboard->text()));
+        displayHtmlText(NCommon::convertToHtml(clipboard->text()));
         mInputBuffer += clipboard->text();
     }
 
@@ -181,7 +182,7 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent 
    {
        setWriter(WriterType::User);
        mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
-       displayHtmlText(convertTextToHtml(e->text()));
+       displayHtmlText(NCommon::convertToHtml(e->text()));
        mInputBuffer += e->text();
    }
 
@@ -191,7 +192,7 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent 
        setWriter(WriterType::User);
        mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
        QClipboard *clipboard = QApplication::clipboard();
-       displayHtmlText(convertTextToHtml(clipboard->text()));
+       displayHtmlText(NCommon::convertToHtml(clipboard->text()));
        mInputBuffer += clipboard->text();
    }
 
@@ -299,7 +300,7 @@ void CPlainTextTerminal::tabKeyHandler()
          mWidget->textCursor().deletePreviousChar();
       }
       mInputBuffer += toAppend;
-      displayHtmlText(convertTextToHtml(toAppend));
+      displayHtmlText(NCommon::convertToHtml(toAppend));
    }
    mTabPressCount = 0;
 }
@@ -308,19 +309,19 @@ void CPlainTextTerminal::appendSimpleText(const QString& text)
 {
    qDebug () << "CPlainTextTerminal::appendSimpleText() " << text;
    setWriter(WriterType::System);
-   displayHtmlText(colorize(convertTextToHtml(text), Colors::Output));
+   displayHtmlText(NCommon::colorize(NCommon::convertToHtml(text), Colors::Output.name()));
 }
 
 void CPlainTextTerminal::appendHtmlText(const QString& text)
 {
    qDebug () << "CPlainTextTerminal::appendHtmlText() " << text;
    setWriter(WriterType::System);
-   displayHtmlText(text);
+   displayHtmlText(NCommon::colorize(text, Colors::Output.name()));
 }
 
 void CPlainTextTerminal::appendErrorText(const QString& text)
 {
-   displayHtmlText(colorize(convertTextToHtml(text), Colors::Error));
+   displayHtmlText(NCommon::colorize(NCommon::convertToHtml(text), Colors::Error.name()));
 }
 
 QWidget *CPlainTextTerminal::getWidget()
@@ -330,7 +331,7 @@ QWidget *CPlainTextTerminal::getWidget()
 
 void CPlainTextTerminal::displaySimpleText(const QString& text)
 {
-   displayHtmlText(colorize(convertTextToHtml(text), Colors::Main));
+   displayHtmlText(NCommon::colorize(NCommon::convertToHtml(text), Colors::Main.name()));
 }
 
 void CPlainTextTerminal::displayHtmlText(const QString& text)

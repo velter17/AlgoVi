@@ -12,6 +12,8 @@
 #include <vector>
 #include <iostream>
 
+#include "framework/common/ClassGenerators.hpp"
+
 namespace
 {
 
@@ -47,23 +49,10 @@ public: // methods
    CCell()
       : mAlign(TAlign::Left), mColor("#ffffff"), mCollspan(1)
    {}
-#define ADD_ATTRIBUTE(name, type) \
-   public: \
-      const type& get##name() const \
-      { return m##name; } \
-      CCell& set##name(const type& item) \
-      { \
-         m##name = item; \
-         return *this; \
-      } \
-   private: \
-      type m##name;
-
-ADD_ATTRIBUTE(Align, TAlign)
-ADD_ATTRIBUTE(Color, QString)
-ADD_ATTRIBUTE(Data, std::vector <QString>)
-ADD_ATTRIBUTE(Collspan, int)
-#undef ADD_ATTRIBUTE
+ADD_ATTRIBUTE(CCell, Align, TAlign)
+ADD_ATTRIBUTE(CCell, Color, QString)
+ADD_ATTRIBUTE(CCell, Data, std::vector <QString>)
+ADD_ATTRIBUTE(CCell, Collspan, int)
 
 public: // methods
     int height() const { return mData.size(); }

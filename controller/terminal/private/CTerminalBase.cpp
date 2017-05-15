@@ -11,6 +11,7 @@
 
 #include "controller/terminal/CTerminalBase.hpp"
 #include "controller/terminal/TerminalHelpers.hpp"
+#include "framework/common/HtmlConverter.hpp"
 #include "framework/filesystem/filesystem.hpp"
 
 namespace NController
@@ -89,12 +90,13 @@ QStringList CTerminalBase::complation(const QString& cmd, int& lastWordLen)
 
 void CTerminalBase::displayNewCommandPrompt()
 {
+   using namespace NCommon;
    setWriter(WriterType::User);
    QString titleColor = "#ffb266";
-   QString promptMessage = colorize(convertTextToHtml(mPromptMessage), QColor(titleColor));
-   promptMessage += colorize("<b>" + toHtmlSymbol(8867) + toHtmlSymbol(8866) + "</b>", QColor("#ffffff"));
+   QString promptMessage = colorize(convertToHtml(mPromptMessage), titleColor);
+   promptMessage += colorize("<b>" + toHtmlSymbol(8867) + toHtmlSymbol(8866) + "</b>", "#ffffff");
    promptMessage += NFileSystem::get_current_dir();
-   promptMessage += colorize("&nbsp;<b>" + toHtmlSymbol(8921) + "</b>&nbsp;", QColor("#99ffff"));
+   promptMessage += colorize("&nbsp;<b>" + toHtmlSymbol(8921) + "</b>&nbsp;", "#99ffff");
    displayHtmlText(promptMessage);
    mPromptMessageLength = mPromptMessage.length() + 3;
 }
