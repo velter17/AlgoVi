@@ -20,7 +20,7 @@
 + 28. handle wrong spaces in complation
 29. test generator
 30. test validator
-31. more default checkers
++ 31. more default checkers
 32. executor runs with time limit
 33. tle verdict handler
 34. test reader and writer runs in separate threads
@@ -29,4 +29,5 @@
 37. compiler config
 38. terminal config
 39. interactive tester
-40. executor with debug output
++ 40. executor with debug output
++ 41. complation with value list
