@@ -71,7 +71,7 @@ CTesterCommand::CTesterCommand()
 {
    mOptions.add_options()
       ("src,s", boost::program_options::value<std::string>()->required(), "source code path")
-      ("checker,c", boost::program_options::value<std::string>(), "checker code path\n"
+      ("checker,c", boost::program_options::value<std::string>()->default_value("testlib_wcmp"), "checker code path\n"
                                                                   "[or name of builtin, see manual]")
       ("test,t", boost::program_options::value<std::string>(),
          "if no param - test whole test archive\n"
@@ -111,10 +111,16 @@ void CTesterCommand::run()
       }
    }
 
-   if(varMap.count("checker"))
+   mCheckerPath = QString::fromStdString(varMap["checker"].as<std::string>());
+   if(!mCheckerPath.startsWith("testlib_"))
    {
-      mCheckerPath = NFileSystem::get_full_path(
-               QString::fromStdString(varMap["checker"].as<std::string>()));
+      mCustomChecker = true;
+      mCheckerPath = NFileSystem::get_full_path(mCheckerPath);
+   }
+   else
+   {
+      mCustomChecker = false;
+      mCheckerAppPath = NFileSystem::get_full_system_path("checkers/" + mCheckerPath);
    }
 
    mVerboseFlag = varMap["verbose"].as<bool>();
@@ -196,7 +202,7 @@ void CTesterCommand::compile()
             QStringList(),
             getProgLanguageType(NFileSystem::get_file_extension(mCodePath).toStdString()))
       };
-   if(!mCheckerPath.isEmpty())
+   if(mCustomChecker)
    {
       tasks.push_back(CCompiler::SCompilerTask(
                          mCheckerPath,
@@ -210,11 +216,10 @@ void CTesterCommand::compile()
       if(code == 0)
       {
           mAppPath = compiler->getResult()[0];
-          if(!mCheckerPath.isEmpty())
+          if(mCustomChecker)
           {
               mCheckerAppPath = compiler->getResult()[1];
           }
-          mCustomChecker = !mCheckerPath.isEmpty();
       }
       compiler->deleteLater();
       emit compilationFinished(code);

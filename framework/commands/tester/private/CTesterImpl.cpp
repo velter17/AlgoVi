@@ -73,18 +73,9 @@ void CTesterImpl::check(const tTest& test)
         file.close();
     }
 
-    const QString defaultChecker = NFileSystem::get_full_system_path("checkers/testlib_wcmp");
-
     mExecutor = new CAppExecutor();
     QStringList args;
-    if(mJob.getCheckerPath().isEmpty())
-    {
-        args << "--src" << defaultChecker;
-    }
-    else
-    {
-        args << "--src" << mJob.getCheckerPath();
-    }
+    args << "--src" << mJob.getCheckerPath();
     for(auto& itr : filesVec)
     {
         args << "--arg" << itr.first;
