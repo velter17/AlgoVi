@@ -10,151 +10,13 @@
 #include <QFile>
 #include <iostream>
 
-#include "framework/commands/CAppExecutor.hpp"
+#include "framework/commands/executor/CAppExecutor.hpp"
 #include "framework/commands/CCompiler.hpp"
 #include "framework/filesystem/filesystem.hpp"
 #include "framework/commands/ProcessHelper.hpp"
 #include "framework/commands/testCommand/CTestProvider.hpp"
-#include "framework/common/HtmlConverter.hpp"
+#include "framework/commands/executor/DebugHelper.hpp"
 
-namespace
-{
-
-QString preprocessCode(const QString& codePath)
-{
-   QString codeFolder = NFileSystem::get_file_path(codePath);
-   QString clearCodePath = codeFolder + "/" + NFileSystem::get_file_name(codePath) +
-         "_clear." + NFileSystem::get_file_extension(codePath);
-   QString debugFile = codeFolder + "/algovi_debug.h";
-   QFile file(debugFile);
-   if(!file.open(QFile::ReadOnly))
-   {
-      return "can't open algovi_debug.h";
-   }
-
-   QString keyWord = file.readLine();
-   if(!keyWord.isEmpty())
-   {
-      keyWord.chop(1);
-   }
-   QStringList list = keyWord.split(' ', QString::SkipEmptyParts);
-   if(list.size() < 2 || (list.first() != "#define"))
-   {
-      return "wrong keyWord line in algovi_debug.h, line = " + keyWord;
-   }
-   else
-   {
-      keyWord = list.at(1);
-      file.close();
-   }
-
-   file.setFileName(codePath);
-   if(!file.open(QFile::ReadOnly))
-   {
-      return "can't open " + codePath;
-   }
-   QFile destFile(clearCodePath);
-   if(!destFile.open(QFile::WriteOnly))
-   {
-      return "can't create " + clearCodePath;
-   }
-
-   bool debugOutput = false;
-   while(true)
-   {
-      QString str = file.readLine();
-      if(str.isEmpty())
-      {
-         break;
-      }
-      int idx = 0;
-      while(idx < str.length() && str[idx] == QChar::Tabulation || str[idx] == QChar::Space)
-      {
-         ++idx;
-      }
-      if(str.mid(idx).startsWith(keyWord + "_start"))
-      {
-         debugOutput = true;
-      }
-      else if(str.mid(idx).startsWith(keyWord + "_end"))
-      {
-         debugOutput = false;
-      }
-      if(debugOutput || str.mid(idx).startsWith(keyWord) || str.startsWith("#include \"algovi_debug.h\""))
-      {
-         continue;
-      }
-      std::cout << "line: '" << str.mid(idx).toStdString() << "'";
-      destFile.write(str.toLocal8Bit());
-   }
-   destFile.close();
-   return QString();
-}
-
-QString processDebugStr(const QString& str)
-{
-   qDebug () << "processDebugStr " << str;
-   static QString lastColor;
-   static int colorsCnt = 0;
-   QString ret;
-   if(!lastColor.isEmpty())
-   {
-      ret = "<font color=" + lastColor + ">";
-   }
-   const QString startcolor = "[color=";
-   const QString endcolor = "[color]";
-   for(int i = 0; i < str.length(); ++i)
-   {
-      bool check = i > 5;
-      for(int j = i - 6; j <= i && check; ++j)
-      {
-         check &= startcolor[j - i + 6] == str[j];
-      }
-      if(check)
-      {
-         ret.chop(6);
-         ++i;
-         lastColor.clear();
-         while(i < str.length() && str[i] != ']')
-         {
-            lastColor += str[i];
-            ++i;
-         }
-         ret += "<font color=" + lastColor + ">";
-         ++colorsCnt;
-      }
-      else
-      {
-         check = i > 5;
-         for(int j = i - 6; j <= i && check; ++j)
-         {
-            check &= endcolor[j - i + 6] == str[j];
-         }
-         if(check)
-         {
-            ret.chop(6);
-            if(colorsCnt > 0)
-            {
-               --colorsCnt;
-               ret += "</font>";
-            }
-            lastColor.clear();
-         }
-         else
-         {
-            ret += NCommon::convertToHtml(str[i]);
-         }
-      }
-   }
-   if(!lastColor.isEmpty())
-   {
-      ret += "</font>";
-   }
-   qDebug () << "returned " << ret;
-   return ret;
-}
-
-} // anonymous namespace
 
 namespace NCommand
 {
@@ -162,7 +24,6 @@ namespace NCommand
 CAppExecutor::CAppExecutor()
    : mOutputType(OutputType::NoSpecified)
 {
-    qDebug () << "CAppExecutor constructor started";
     mOptions.add_options()
         ("src,s", boost::program_options::value <std::string>()->required(),
             "source file for execution")
@@ -183,10 +44,11 @@ CAppExecutor::CAppExecutor()
         ("test,t", boost::program_options::value <int>(), "run on test")
         ("time-limit", boost::program_options::value<int>(), "execute no more then [value in ms]")
         ("debug", boost::program_options::bool_switch()->default_value(false),
-            "merge stdout&stderr and apply colors");
+            "apply colors")
+        ("remove-debug", boost::program_options::bool_switch()->default_value(false),
+            "execute without debug instructions");
 //        ("test-save", boost::program_options::bool_switch(),
     //            "save test after execution");
-    qDebug () << "CAppExecutor constructor finished";
 }
 
 CAppExecutor::~CAppExecutor()
@@ -233,6 +95,7 @@ void CAppExecutor::run()
 
     mTestToRun = varMap.count("test") ? varMap["test"].as<int>() : -1;
     mDebugMode = varMap["debug"].as<bool>();
+    mRemoveDebug = varMap["remove-debug"].as<bool>();
 
     compileCode(codePath, flags, args, language);
 }
@@ -273,17 +136,22 @@ void CAppExecutor::compileCode(const QString& codePath,
                                const QStringList& args,
                                ProgLanguage::EType lang)
 {
-    if(mDebugMode)
+    QString codeToCompile;
+    if(mRemoveDebug)
     {
-       QString str = preprocessCode(codePath);
-       if(!str.isEmpty())
+       QString msg = clearCodePath(codePath, codeToCompile);
+       if(!msg.isEmpty())
        {
-          emit log(" [ Warning ] Error during debug code preprocessing: '" +
-                   str + "'\n"
-                   " [ Warning ] Clear code was not created\n");
+          emit error(" [ Error ] " + msg + "\n");
+          emit finished(1);
+          return;
        }
     }
-    CCompiler* compiler = new CCompiler({CCompiler::SCompilerTask(codePath, flags, lang, mForcedCompilation)});
+    else
+    {
+       codeToCompile = codePath;
+    }
+    CCompiler* compiler = new CCompiler({CCompiler::SCompilerTask(codeToCompile, flags, lang, mForcedCompilation)});
     connect(compiler, &CCompiler::log, [this](const QString& msg){
         emit log(msg);
     });

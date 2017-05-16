@@ -14,6 +14,7 @@
 #include "framework/commands/tester/private/CTesterImpl.hpp"
 #include "framework/filesystem/filesystem.hpp"
 #include "framework/commands/testCommand/TableDrawer.hpp"
+#include "framework/commands/executor/DebugHelper.hpp"
 
 namespace
 {
@@ -76,7 +77,9 @@ CTesterCommand::CTesterCommand()
          "if no param - test whole test archive\n"
          "if a-b -> test on range [a..b]\n"
          "if :a,b,..,c -> test on list (a,b,..,c)\n")
-       ("verbose", boost::program_options::bool_switch()->default_value(false),
+      ("remove-debug", boost::program_options::bool_switch()->default_value(false),
+         "execute without debug instructions")
+      ("verbose", boost::program_options::bool_switch()->default_value(false),
          "detailed report");
 }
 
@@ -92,6 +95,22 @@ void CTesterCommand::run()
 
    mCodePath = NFileSystem::get_full_path(
             QString::fromStdString(varMap["src"].as<std::string>()));
+   if(varMap["remove-debug"].as<bool>())
+   {
+      QString dst;
+      QString msg = clearCodePath(mCodePath, dst);
+      if(!msg.isEmpty())
+      {
+         emit error(" [ Error ] " + msg + "\n");
+         emit finished(1);
+         return;
+      }
+      else
+      {
+         mCodePath = dst;
+      }
+   }
+
    if(varMap.count("checker"))
    {
       mCheckerPath = NFileSystem::get_full_path(

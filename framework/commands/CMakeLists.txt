@@ -9,12 +9,14 @@ set ( TERMINAL_COMMANDS_LIB_SOURCES
     "private/CSystemCommand.cpp"
     "CPythonShell.hpp"
     "private/CPythonShell.cpp"
-    "CAppExecutor.hpp"
-    "private/CAppExecutor.cpp"
     "CCompiler.hpp"
     "private/CCompiler.cpp"
     "private/CCompilerExecutor.hpp"
     "private/CCompilerExecutor.cpp"
+
+    "executor/CAppExecutor.hpp"
+    "executor/private/CAppExecutor.cpp"
+    "executor/DebugHelper.hpp"
 
     "testCommand/CTestProvider.hpp"
     "testCommand/private/CTestProvider.cpp"

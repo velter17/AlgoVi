@@ -65,6 +65,7 @@ private: // fields
     OutputType::EType mOutputType;
     QString mOutputStorage;
     bool mDebugMode;
+    bool mRemoveDebug;
 };
 
 } // namespace NCommand

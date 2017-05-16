@@ -11,7 +11,7 @@
 #include <QObject>
 #include <QTemporaryDir>
 
-#include "framework/commands/CAppExecutor.hpp"
+#include "framework/commands/executor/CAppExecutor.hpp"
 #include "framework/commands/testCommand/CTestProvider.hpp"
 #include "framework/common/ClassGenerators.hpp"
 
