@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <QMap>
 #include <boost/program_options.hpp>
 
 #include "framework/commands/ITerminalCommand.hpp"
@@ -28,6 +29,7 @@ public: // methods
     void setArgs(const QStringList& args);
 
     QStringList getOptionsList();
+    QStringList getOptionValues(const QString& option);
 
 protected: // methods
     QString getManualMessage() override;
@@ -41,6 +43,7 @@ protected: // fields
     QString mWorkingDirectory;
     boost::program_options::options_description mOptions;
     boost::program_options::positional_options_description mOptionsPositional;
+    QMap<QString, QStringList> mOptionValues;
     uint32_t mWorkingTime;
 };
 

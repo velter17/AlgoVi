@@ -49,6 +49,8 @@ CAppExecutor::CAppExecutor()
             "execute without debug instructions");
 //        ("test-save", boost::program_options::bool_switch(),
     //            "save test after execution");
+
+    mOptionValues["--lang"].append(getProgLanguageList());
 }
 
 CAppExecutor::~CAppExecutor()

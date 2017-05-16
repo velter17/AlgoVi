@@ -27,6 +27,7 @@ public: // methods
     void appendData(const QString& data) override;
     void terminate() override;
     QStringList getArguments() override;
+    QStringList getArgumentValues(const QString& arg) override;
 private: // fields
     T* mProc;
     NController::CController* mControllerPtr;
@@ -71,6 +72,12 @@ template <typename T>
 inline QStringList CJobBase<T>::getArguments()
 {
    return mProc->getOptionsList();
+}
+
+template <typename T>
+inline QStringList CJobBase<T>::getArgumentValues(const QString& arg)
+{
+   return mProc->getOptionValues(arg);
 }
 
 } // namespace NAlgoVi

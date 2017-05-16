@@ -167,7 +167,13 @@ void CCommandHandler::makeComplationProvider()
         }
         else
         {
-            ret->addCommand(key, job->getArguments());
+            NCommand::tArgumentsContainer container;
+            QStringList args = job->getArguments();
+            for(const QString& str : args)
+            {
+               container.insert(str, job->getArgumentValues(str));
+            }
+            ret->addCommand(key, container);
         }
     }
     mControllerPtr->setComplation(ret);

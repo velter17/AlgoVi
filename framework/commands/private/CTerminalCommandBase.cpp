@@ -68,6 +68,15 @@ QStringList CTerminalCommandBase::getOptionsList()
     return ret;
 }
 
+QStringList CTerminalCommandBase::getOptionValues(const QString &option)
+{
+   if(mOptionValues.find(option) == mOptionValues.end())
+   {
+      return QStringList();
+   }
+   return mOptionValues[option];
+}
+
 QString CTerminalCommandBase::getManualMessage()
 {
     return "Sorry, no manual message :(";

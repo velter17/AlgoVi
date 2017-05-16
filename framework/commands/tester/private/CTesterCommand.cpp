@@ -71,8 +71,9 @@ CTesterCommand::CTesterCommand()
 {
    mOptions.add_options()
       ("src,s", boost::program_options::value<std::string>()->required(), "source code path")
-      ("checker,c", boost::program_options::value<std::string>()->default_value("testlib_wcmp"), "checker code path\n"
-                                                                  "[or name of builtin, see manual]")
+      ("checker,c", boost::program_options::value<std::string>()->default_value("testlib_wcmp"),
+         "checker code path\n"
+         "[or name of builtin, see manual]")
       ("test,t", boost::program_options::value<std::string>(),
          "if no param - test whole test archive\n"
          "if a-b -> test on range [a..b]\n"
@@ -81,6 +82,20 @@ CTesterCommand::CTesterCommand()
          "execute without debug instructions")
       ("verbose", boost::program_options::bool_switch()->default_value(false),
          "detailed report");
+
+   mOptionValues["--checker"].append({
+                                      "testlib_hcmp",
+                                      "testlib_icmp",
+                                      "testlib_lcmp",
+                                      "testlib_ncmp",
+                                      "testlib_rcmp",
+                                      "testlib_rcmp4",
+                                      "testlib_rcmp6",
+                                      "testlib_rcmp9",
+                                      "testlib_uncmp",
+                                      "testlib_wcmp",
+                                      "testlib_yesno"
+                                   });
 }
 
 void CTesterCommand::run()

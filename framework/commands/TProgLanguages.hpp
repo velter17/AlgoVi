@@ -8,7 +8,9 @@
 
 #pragma once
 
+#include <QStringList>
 #include <string>
+
 
 namespace NCommand
 {
@@ -22,6 +24,7 @@ struct ProgLanguage
         PYTHON,
         HASKELL,
         BINARY,
+        TOTAL,
     };
 };
 
@@ -69,8 +72,18 @@ inline std::string toString(ProgLanguage::EType lang)
     }
     else
     {
-        return "binary file";
+        return "binary-file";
     }
+}
+
+inline QStringList getProgLanguageList()
+{
+    QStringList ret;
+    for(std::size_t i = 0; i < static_cast<std::size_t>(ProgLanguage::TOTAL); ++i)
+    {
+        ret.append(QString::fromStdString(toString(static_cast<ProgLanguage::EType>(i))));
+    }
+    return ret;
 }
 
 } // namespace NCommand

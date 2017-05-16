@@ -14,17 +14,18 @@
 namespace NCommand
 {
 
+typedef QMap<QString, QStringList> tArgumentsContainer;
+
 class CComplationProvider
 {
 public: // methods
     CComplationProvider();
     void addCommand(const QString& name);
-    void addCommand(const QString& name, const QStringList& args);
+    void addCommand(const QString& name, const tArgumentsContainer& args);
     QStringList complation(const QString& cmd, int& lastWordLen);
 private: // fields
     QStringList mCommandList;
-    QMap <QString, QStringList> mArgumentsList;
-
+    QMap <QString, tArgumentsContainer> mArgumentsList;
 };
 
 } // namespace NCommand

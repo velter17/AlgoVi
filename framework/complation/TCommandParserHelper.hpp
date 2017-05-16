@@ -25,6 +25,16 @@ inline int isArgument(const QString& cmd)
    return cmd.length() > 1 && cmd.mid(0, 2) == "--";
 }
 
+inline int isArgumentValue(const QString& cmd)
+{
+   int idx = cmd.length() - 1;
+   while(idx >= 0 && cmd[idx] != '=')
+   {
+      --idx;
+   }
+   return idx;
+}
+
 inline QStringList processHint(const QStringList& list,
                                const QString& arg,
                                bool needEndedSpace = true)

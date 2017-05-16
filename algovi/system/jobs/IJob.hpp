@@ -24,6 +24,7 @@ public slots:
     virtual void appendData(const QString& data) = 0;
     virtual void terminate() = 0;
     virtual QStringList getArguments(){return QStringList();}
+    virtual QStringList getArgumentValues(const QString& arg){return QStringList();}
 signals:
     void started();
     void finished();
