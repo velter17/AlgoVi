@@ -206,11 +206,7 @@ void CTestCommand::printTest(int idx)
              .setColor("#FF9999")
              .setData({"output"})};
 
-   const static int sMaxLen = 150;
-   const tTest& test = CTestProvider::getInstance().getTest(idx-1);
-   tTest testToPrint;
-   testToPrint.first = test.first.length() > sMaxLen ? test.first.mid(0, sMaxLen) + "\n..." : test.first;
-   testToPrint.second = test.second.length() > sMaxLen ? test.second.mid(0, sMaxLen) + "\n..." : test.second;
+   tTest testToPrint = CTestProvider::getInstance().getTestShort(idx-1);
    std::vector <std::vector <CCell> > table { head };
    table[0][0].setData({QString::number(idx)});
    QStringList input = testToPrint.first.split('\n');

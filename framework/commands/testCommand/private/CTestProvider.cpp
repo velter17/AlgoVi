@@ -43,6 +43,16 @@ const tTest& CTestProvider::getTest(int idx)
     return mData[idx];
 }
 
+tTest CTestProvider::getTestShort(int idx)
+{
+   const static int sMaxLen = 150;
+   const tTest& test = getTest(idx);
+   tTest ret;
+   ret.first = test.first.length() > sMaxLen ? test.first.mid(0, sMaxLen) + "\n..." : test.first;
+   ret.second = test.second.length() > sMaxLen ? test.second.mid(0, sMaxLen) + "\n..." : test.second;
+   return ret;
+}
+
 void CTestProvider::erase(int idx)
 {
     if(idx >= mData.size())

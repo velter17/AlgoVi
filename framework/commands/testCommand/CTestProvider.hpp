@@ -22,6 +22,7 @@ public: // methods
     static CTestProvider& getInstance();
     void addTest(const tTest& test);
     const tTest& getTest(int idx);
+    tTest getTestShort(int idx);
     void erase(int idx);
     void erase(int from, int to);
     void swap(int a, int b);
