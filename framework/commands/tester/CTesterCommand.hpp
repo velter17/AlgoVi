@@ -34,7 +34,7 @@ private: // methods
     void testList(const tList& list, int idx);
     void runTest(int idx, std::function<void()> callback);
 
-    void finish(int tests);
+    void finish();
 signals:
     void compilationFinished(int code);
 private: // fields
@@ -46,7 +46,11 @@ private: // fields
     bool mVerboseFlag;
     CTesterImpl* mTesterImpl;
     int mAcceptedTests;
+    int mCheckedTests;
     bool mCustomChecker;
+    int mTimeLimit;
+    int mInfoMask;
+    bool mTerminatedFlag;
 };
 
 } // namespace NCommand

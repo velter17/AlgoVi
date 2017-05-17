@@ -10,6 +10,7 @@
 #include <QDebug>
 
 #include "algovi/system/CCommandHandler.hpp"
+#include "algovi/system/jobs/CApplicationRunner.hpp"
 #include "algovi/system/jobs/CEmptyJob.hpp"
 #include "algovi/system/jobs/CJobForTest.hpp"
 #include "algovi/system/jobs/CExitCommandJob.hpp"
@@ -112,7 +113,7 @@ std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::ChangeDir>()
 template <>
 std::shared_ptr<IJob> CCommandHandler::jobCreator<CommandType::ExecuteApp>()
 {
-   return std::make_shared<CJobBase<NCommand::CAppExecutor>>(mControllerPtr);
+   return std::make_shared<CApplicationRunner>(mControllerPtr);
 }
 
 template <>

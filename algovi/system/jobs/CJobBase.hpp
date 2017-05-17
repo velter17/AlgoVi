@@ -9,11 +9,7 @@
 #pragma once
 
 #include "algovi/system/jobs/IJob.hpp"
-
-namespace NController
-{
-class CController;
-}
+#include "controller/CController.hpp"
 
 namespace NAlgoVi
 {
@@ -28,7 +24,7 @@ public: // methods
     void terminate() override;
     QStringList getArguments() override;
     QStringList getArgumentValues(const QString& arg) override;
-private: // fields
+protected: // fields
     T* mProc;
     NController::CController* mControllerPtr;
 };

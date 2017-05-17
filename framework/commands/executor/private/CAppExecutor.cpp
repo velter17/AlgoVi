@@ -23,6 +23,8 @@ namespace NCommand
 
 CAppExecutor::CAppExecutor()
    : mOutputType(OutputType::NoSpecified)
+   , mTimeLimitExceeded(false)
+   , mCrashed(false)
 {
     mOptions.add_options()
         ("src,s", boost::program_options::value <std::string>()->required(),
@@ -64,7 +66,7 @@ void CAppExecutor::run()
     boost::program_options::variables_map varMap;
     if(!readOptions(mArgs, varMap))
     {
-        emit finished(1);
+        emit finished(static_cast<int>(ReturnCodes::CompilationError));
         return;
     }
 
@@ -99,12 +101,17 @@ void CAppExecutor::run()
     mDebugMode = varMap["debug"].as<bool>();
     mRemoveDebug = varMap["remove-debug"].as<bool>();
 
+    mTimeLimit = varMap.count("time-limit")
+             ? varMap["time-limit"].as<int>()
+             : 0;
+    mTimeLimit = mTimeLimit <= 0 ? 1000 * 60 * 60 : mTimeLimit;
+
     compileCode(codePath, flags, args, language);
 }
 
 void CAppExecutor::appendData(const QString& str)
 {
-    qDebug () << "CAppExecutor::appendData() " << str;
+    //qDebug () << "CAppExecutor::appendData() " << str;
     mProcess->write(str.toLocal8Bit());
     mProcess->write("\n");
 }
@@ -130,7 +137,12 @@ void CAppExecutor::setOutputType(OutputType::EType type)
 
 QString CAppExecutor::getOutput()
 {
-    return mOutputStorage;
+   return mOutputStorage;
+}
+
+uint32_t CAppExecutor::getExecutionTime()
+{
+   return mExecutionTime;
 }
 
 void CAppExecutor::compileCode(const QString& codePath,
@@ -145,7 +157,7 @@ void CAppExecutor::compileCode(const QString& codePath,
        if(!msg.isEmpty())
        {
           emit error(" [ Error ] " + msg + "\n");
-          emit finished(1);
+          emit finished(static_cast<int>(ReturnCodes::CompilationError));
           return;
        }
     }
@@ -168,7 +180,7 @@ void CAppExecutor::compileCode(const QString& codePath,
         }
         else
         {
-            emit finished(1);
+            emit finished(static_cast<int>(ReturnCodes::CompilationError));
         }
         compiler->deleteLater();
     });
@@ -185,7 +197,7 @@ void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
         {
             emit error(" [ Error ] failed to open " + QString::fromStdString(mOutputFilePath)
                       + "for writing\n");
-            emit finished(1);
+            emit finished(static_cast<int>(ReturnCodes::CompilationError));
             return;
         }
         mOutputType = OutputType::ToFile;
@@ -201,7 +213,7 @@ void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
        if(CTestProvider::getInstance().size() < mTestToRun)
        {
           emit error(" [ Error ] wrong test to run\n");
-          emit finished(1);
+          emit finished(static_cast<int>(ReturnCodes::CompilationError));
           return;
        }
        inputData = CTestProvider::getInstance().getTest(mTestToRun-1).first + "\n";
@@ -213,7 +225,7 @@ void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
        {
           emit error(" [ Error ] failed to open " + QString::fromStdString(mInputFilePath)
                     + "for reading\n");
-          emit finished(1);
+          emit finished(static_cast<int>(ReturnCodes::CompilationError));
           return;
        }
        std::string buffer;
@@ -247,7 +259,6 @@ void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
        }
     });
     connect(mProcess, &QProcess::readyReadStandardError, [this](){
-        qDebug () << "mProcess readyReadStandardError";
         emit error(mProcess->readAllStandardError());
     });
     mProcess->setWorkingDirectory(mWorkingDirectory);
@@ -255,22 +266,47 @@ void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
             [this](int code)
     {
         qDebug () << "CAppExecutor: mProcess finished with code " << code;
+        qDebug () << "remaining time: " << mTimer.remainingTime() << ", timeLimit = " << mTimeLimit;
+        mExecutionTime = mTimeLimit - mTimer.remainingTime();
+        mTimer.stop();
         if(mOutputType == OutputType::ToFile)
         {
             mOutputFile.close();
         }
         mProcess->deleteLater();
         mProcess = nullptr;
-        emit finished(code);
+        int codeToFinish = mTimeLimitExceeded
+              ? static_cast<int>(ReturnCodes::TimeLimitExceeded)
+              : static_cast<int>(code == 0 && !mCrashed ? ReturnCodes::Success : ReturnCodes::RuntimeError);
+        emit finished(codeToFinish);
     });
     mErrorConnection = connect(mProcess, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
                                [this](QProcess::ProcessError err){
         qDebug () << "CAppExecutor: mProcess emitted error" << processErrorToStr(err);
-        emit error(processErrorToStr(err) + "\n");
-        mProcess->deleteLater();
-        mProcess = nullptr;
-        emit finished(1);
+        if(err == QProcess::FailedToStart)
+        {
+            mExecutionTime = mTimeLimit - mTimer.remainingTime();
+            mTimer.stop();
+            emit error(processErrorToStr(err) + "\n");
+            mProcess->deleteLater();
+            mProcess = nullptr;
+            emit finished(static_cast<int>(ReturnCodes::RuntimeError));
+         }
+         else
+         {
+            disconnect(mErrorConnection);
+            mCrashed = true;
+         }
     });
+
+    mTimer.setInterval(mTimeLimit);
+    mTimer.setSingleShot(true);
+    mTimer.setTimerType(Qt::PreciseTimer);
+    connect(&mTimer, &QTimer::timeout, [this](){
+       terminate();
+       mTimeLimitExceeded = true;
+    });
+    connect(mProcess, SIGNAL(started()), &mTimer, SLOT(start()));
 
     qDebug () << "start " << appPath << ", args: " << args;
     if(mDebugMode)

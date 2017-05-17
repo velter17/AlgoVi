@@ -60,7 +60,6 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent
                || e->modifiers() == Qt::KeypadModifier))
     {
         setWriter(WriterType::User);
-        mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
         displayHtmlText(NCommon::convertToHtml(e->text()));
         mInputBuffer += e->text();
     }
@@ -69,7 +68,6 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::WaitForCommand>(QKeyEvent
     if(e->key() == 0x56 && e->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier))
     {
         setWriter(WriterType::User);
-        mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
         QClipboard *clipboard = QApplication::clipboard();
         displayHtmlText(NCommon::convertToHtml(clipboard->text()));
         mInputBuffer += clipboard->text();
@@ -181,7 +179,6 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent 
               || e->modifiers() == Qt::KeypadModifier))
    {
        setWriter(WriterType::User);
-       mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
        displayHtmlText(NCommon::convertToHtml(e->text()));
        mInputBuffer += e->text();
    }
@@ -190,7 +187,6 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent 
    if(e->key() == 0x56 && e->modifiers() == (Qt::ShiftModifier | Qt::ControlModifier))
    {
        setWriter(WriterType::User);
-       mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
        QClipboard *clipboard = QApplication::clipboard();
        displayHtmlText(NCommon::convertToHtml(clipboard->text()));
        mInputBuffer += clipboard->text();
@@ -337,6 +333,7 @@ void CPlainTextTerminal::displaySimpleText(const QString& text)
 void CPlainTextTerminal::displayHtmlText(const QString& text)
 {
    mWidget->textCursor().insertHtml(text);
+   mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
 }
 
 void CPlainTextTerminal::onWriterChanged(WriterType::EType newWriter)

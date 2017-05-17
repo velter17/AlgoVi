@@ -10,12 +10,24 @@
 
 #include <fstream>
 #include <QProcess>
+#include <QTimer>
 
 #include "framework/commands/CCompiler.hpp"
 #include "framework/commands/TProgLanguages.hpp"
 
 namespace NCommand
 {
+
+struct ReturnCodes
+{
+   enum EType
+   {
+      Success,
+      CompilationError,
+      RuntimeError,
+      TimeLimitExceeded,
+   };
+};
 
 struct OutputType
 {
@@ -41,6 +53,8 @@ public: // methods
 
     void setOutputType(OutputType::EType type);
     QString getOutput();
+
+    std::uint32_t getExecutionTime();
 signals:
     void finishedWithTime(uint32_t time);
 private: // methods
@@ -58,12 +72,21 @@ private: // fields
     QStringList mArgs;
     QMetaObject::Connection mErrorConnection;
     bool mForcedCompilation;
+
+    int mTimeLimit;
+    QTimer mTimer;
+    int mExecutionTime;
+
+    bool mTimeLimitExceeded;
+    bool mCrashed;
+
     std::string mInputFilePath;
     std::string mOutputFilePath;
     std::ofstream mOutputFile;
-    int mTestToRun;
     OutputType::EType mOutputType;
     QString mOutputStorage;
+
+    int mTestToRun;
     bool mDebugMode;
     bool mRemoveDebug;
 };

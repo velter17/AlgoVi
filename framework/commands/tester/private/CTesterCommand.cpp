@@ -19,6 +19,11 @@
 namespace
 {
 
+bool maskContainChar(int mask, char c)
+{
+   return (mask & (1 << (c - 'a'))) != 0;
+}
+
 QString colorize(const QString& text, const QString& color)
 {
     return "<font color=" + color + ">" + text + "</font>";
@@ -68,6 +73,8 @@ namespace NCommand
 
 CTesterCommand::CTesterCommand()
     : mAcceptedTests(0)
+    , mCheckedTests(0)
+    , mTerminatedFlag(false)
 {
    mOptions.add_options()
       ("src,s", boost::program_options::value<std::string>()->required(), "source code path")
@@ -78,6 +85,14 @@ CTesterCommand::CTesterCommand()
          "if no param - test whole test archive\n"
          "if a-b -> test on range [a..b]\n"
          "if :a,b,..,c -> test on list (a,b,..,c)\n")
+      ("time-limit", boost::program_options::value<int>()->default_value(2000),
+         "time limit [in ms]")
+      ("info,i", boost::program_options::value<std::string>()->default_value(""),
+         "info report flags, (example '--info lta')\n"
+         "  a - all verdicts in list\n"
+         "  c - checker reports\n"
+         "  l - test list (without passed)\n"
+         "  t - execution time\n")
       ("remove-debug", boost::program_options::bool_switch()->default_value(false),
          "execute without debug instructions")
       ("verbose", boost::program_options::bool_switch()->default_value(false),
@@ -139,6 +154,23 @@ void CTesterCommand::run()
    }
 
    mVerboseFlag = varMap["verbose"].as<bool>();
+
+   mTimeLimit = varMap.count("time-limit")
+            ? varMap["time-limit"].as<int>()
+            : 0;
+
+   mInfoMask = 0;
+   for(char c : varMap["info"].as<std::string>())
+   {
+      const QString allowedLetters = "aclt";
+      if(!allowedLetters.contains(QChar(c)))
+      {
+         emit error(" [ Error ] Wrong info mask, '" + QString(c) + "' is not allowed\n");
+         emit finished(1);
+         return;
+      }
+      mInfoMask ^= (1 << (c - 'a'));
+   }
 
    std::function <void()> testFunc;
    if(varMap.count("test"))
@@ -206,7 +238,11 @@ void CTesterCommand::setArgs(const QStringList& args)
 
 void CTesterCommand::terminate()
 {
-
+   mTerminatedFlag = true;
+   if(nullptr != mTesterImpl)
+   {
+      mTesterImpl->terminate();
+   }
 }
 
 void CTesterCommand::compile()
@@ -252,9 +288,9 @@ void CTesterCommand::compile()
 
 void CTesterCommand::testRange(tRange range, int test)
 {
-   if(test > range.second)
+   if(test > range.second || mTerminatedFlag)
    {
-       finish(range.second - range.first + 1);
+       finish();
    }
    else
    {
@@ -264,9 +300,9 @@ void CTesterCommand::testRange(tRange range, int test)
 
 void CTesterCommand::testList(const tList& list, int idx)
 {
-   if(idx >= list.size())
+   if(idx >= list.size() || mTerminatedFlag)
    {
-       finish(list.size());
+       finish();
    }
    else
    {
@@ -282,12 +318,13 @@ void CTesterCommand::runTest(int idx, std::function<void()> callback)
                                              .setTestNumber(idx)
                                              .setVerbose(mVerboseFlag)
                                              .setCustomChecker(mCustomChecker)
-                                             .setTimeLimit(1000000));
+                                             .setTimeLimit(mTimeLimit));
    connect(mTesterImpl, &CTesterImpl::finished, [this, callback, idx](const CTesterResult& result){
        if(result.getResult() == TesterResult::Accepted)
        {
            ++mAcceptedTests;
        }
+       ++mCheckedTests;
        if(mVerboseFlag)
        {
           std::vector <std::vector <CCell> > table {
@@ -295,7 +332,7 @@ void CTesterCommand::runTest(int idx, std::function<void()> callback)
               CCell().setData({"input"}).setAlign(TAlign::Center).setColor("#BFA8FF"),
               CCell().setData({"output"}).setAlign(TAlign::Center).setColor("#FF9999"),
               CCell().setData({"actual"}).setAlign(TAlign::Center).setColor("#00ffff")},
-             {CCell(),
+             {CCell().setData({QString::number(result.getExecutionTime()) + "ms"}),
               CCell().setData(CTestProvider::getInstance().getTest(idx-1).first.split('\n').toVector().toStdVector()),
               CCell().setData(CTestProvider::getInstance().getTest(idx-1).second.split('\n').toVector().toStdVector()),
               CCell().setData(result.getOutput().split('\n').toVector().toStdVector())},
@@ -307,29 +344,41 @@ void CTesterCommand::runTest(int idx, std::function<void()> callback)
 
           emit logHtml(getHtmlTable(table, "#A0A0A0"));
        }
-       else
+       else if(maskContainChar(mInfoMask, 'l'))
        {
-           emit log(" test #" + QString::number(idx) + ": ");
-           QString toLog = resultToStr(result.getResult());
-           emit logHtml(toLog);
-           // TODO: execution time
-           toLog = " -> ( " + result.getMessage() + " )\n";
-           emit log(toLog);
+           if(maskContainChar(mInfoMask, 'a') || result.getResult() != TesterResult::Accepted)
+           {
+              emit log(" test #" + QString::number(idx) + ": ");
+              QString toLog = resultToStr(result.getResult());
+              emit logHtml(toLog);
+              if(maskContainChar(mInfoMask, 't'))
+              {
+                 toLog = toHtmlSymbol(SPACE) + "[ " + QString::number(result.getExecutionTime()) + "ms ]";
+                 emit logHtml(colorize(toLog, "#33ffff"));
+              }
+              if(maskContainChar(mInfoMask, 'c'))
+              {
+                 toLog = " -> ( " + result.getMessage() + " )";
+                 emit log(toLog);
+              }
+              emit log("\n");
+           }
        }
        mTesterImpl->deleteLater();
+       mTesterImpl = nullptr;
        callback();
    });
 
    mTesterImpl->execute();
 }
 
-void CTesterCommand::finish(int tests)
+void CTesterCommand::finish()
 {
     std::vector <std::vector <CCell>> table {
        {CCell().setAlign(TAlign::Center).setCollspan(2).setData({"Test report"})},
-       {CCell().setData({QString::number(mAcceptedTests) + " / " + QString::number(tests)}),
-        CCell().setData({mAcceptedTests == tests ? "Passed" : "Partial solution"})
-               .setColor(mAcceptedTests == tests ? "#9FFF3F" : "#FF6F3F")}
+       {CCell().setData({QString::number(mAcceptedTests) + " / " + QString::number(mCheckedTests)}),
+        CCell().setData({mAcceptedTests == mCheckedTests ? "Passed" : "Partial solution"})
+               .setColor(mAcceptedTests == mCheckedTests ? "#9FFF3F" : "#FF6F3F")}
     };
     emit logHtml(getHtmlTable(table));
     emit finished(0);
