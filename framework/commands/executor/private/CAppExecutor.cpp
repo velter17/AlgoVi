@@ -72,6 +72,13 @@ void CAppExecutor::run()
 
     QString codePath = QString::fromStdString(varMap["src"].as<std::string>());
     codePath = NFileSystem::get_full_path(codePath);
+    if(!NFileSystem::exists(codePath))
+    {
+       emit error(" [ Error ] Wrong source code - no such file\n");
+       emit finished(static_cast<int>(ReturnCodes::CompilationError));
+       return;
+    }
+
     ProgLanguage::EType language = parseProgLanguage(varMap);
 
     QStringList flags;
@@ -90,6 +97,12 @@ void CAppExecutor::run()
     {
        mInputFilePath = NFileSystem::get_full_path(
                 QString::fromStdString(varMap["input"].as<std::string>())).toStdString();
+       if(!NFileSystem::exists(QString::fromStdString(mInputFilePath)))
+       {
+          emit error(" [ Error ] Wrong input file - no such file\n");
+          emit finished(static_cast<int>(ReturnCodes::CompilationError));
+          return;
+       }
     }
     if(varMap.count("output"))
     {
@@ -111,7 +124,6 @@ void CAppExecutor::run()
 
 void CAppExecutor::appendData(const QString& str)
 {
-    //qDebug () << "CAppExecutor::appendData() " << str;
     mProcess->write(str.toLocal8Bit());
     mProcess->write("\n");
 }
@@ -313,13 +325,14 @@ void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
     {
        mProcess->setProcessChannelMode(QProcess::MergedChannels);
     }
-    mProcess->start(appPath, args, QProcess::Unbuffered | QProcess::ReadWrite);
-    mProcess->waitForStarted();
     if(!inputData.isEmpty())
     {
-        appendData(inputData);
-        mProcess->closeWriteChannel();
+       connect(mProcess, &QProcess::started, [this, inputData](){
+          appendData(inputData);
+          mProcess->closeWriteChannel();
+       });
     }
+    mProcess->start(appPath, args, QProcess::Unbuffered | QProcess::ReadWrite);
 }
 
 ProgLanguage::EType CAppExecutor::parseProgLanguage(

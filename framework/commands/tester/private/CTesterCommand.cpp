@@ -39,6 +39,7 @@ QString getResultColor(NCommand::TesterResult::EType type)
       {NCommand::TesterResult::PresentationError, "#ff33c0"},
       {NCommand::TesterResult::RuntimeError, "#ff33c0"},
       {NCommand::TesterResult::TimeLimitExceeded, "#ff33c0"},
+      {NCommand::TesterResult::CompilationError, "#ff33c0"},
       {NCommand::TesterResult::Total, "#ff33c0"},
    };
 
@@ -55,6 +56,7 @@ QString getResultTitle(NCommand::TesterResult::EType type)
       {NCommand::TesterResult::PresentationError, "PE"},
       {NCommand::TesterResult::RuntimeError, "RE"},
       {NCommand::TesterResult::TimeLimitExceeded, "TLE"},
+      {NCommand::TesterResult::CompilationError,  "CE"},
       {NCommand::TesterResult::Total, "??"},
    };
 

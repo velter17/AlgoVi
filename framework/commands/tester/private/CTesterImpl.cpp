@@ -19,11 +19,22 @@ TesterResult::EType codeToTesterResult(int code)
 {
    static QMap <ReturnCodes::EType, TesterResult::EType> mp {
       {ReturnCodes::Success, TesterResult::Accepted},
-      {ReturnCodes::CompilationError, TesterResult::RuntimeError},
+      {ReturnCodes::CompilationError, TesterResult::CompilationError},
       {ReturnCodes::TimeLimitExceeded, TesterResult::TimeLimitExceeded},
       {ReturnCodes::RuntimeError, TesterResult::RuntimeError},
    };
    return mp[static_cast<ReturnCodes::EType>(code)];
+}
+
+QString testerResultToCheckerMessage(TesterResult::EType type)
+{
+   static QMap <TesterResult::EType, QString> mp {
+      {TesterResult::Accepted, "Accepted"},
+      {TesterResult::CompilationError, "compilation error"},
+      {TesterResult::TimeLimitExceeded, "time limit was exceeded"},
+      {TesterResult::RuntimeError, "program return non zero code"},
+   };
+   return mp[type];
 }
 
 CTesterImpl::CTesterImpl(const CTesterJob& job)
@@ -59,7 +70,7 @@ void CTesterImpl::execute()
        {
            mExecutor->deleteLater();
            emit finished(CTesterResult().setResult(codeToTesterResult(code))
-                                        .setMessage("returned with code " + QString::number(code))
+                                        .setMessage(testerResultToCheckerMessage(codeToTesterResult(code)))
                                         .setExecutionTime(execTime));
        }
    });

@@ -28,6 +28,7 @@ struct TesterResult
       RuntimeError,
       CheckFailed,
       PresentationError,
+      CompilationError,
 
       Total
    };
