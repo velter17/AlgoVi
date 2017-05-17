@@ -91,8 +91,8 @@ void CTestWriter::run()
          tList list = parseList(toWrite);
          if(validateList(list, 1000))
          {
-            qDebug () << "list " << QVector<int>::fromStdVector(list);
-            writeTests(list);
+            std::thread t1(&CTestWriter::writeTestsList, this, list);
+            t1.detach();
          }
          else
          {
@@ -106,7 +106,8 @@ void CTestWriter::run()
          tRange range = parseRange(toWrite);
          if(validateRange(range, 1000))
          {
-            writeTests(range);
+            std::thread t1(&CTestWriter::writeTestsRange, this, range);
+            t1.detach();
          }
          else
          {
@@ -119,12 +120,14 @@ void CTestWriter::run()
    else
    {
       tRange range(1, CTestProvider::getInstance().size());
-      writeTests(range);
+      std::thread t1(&CTestWriter::writeTestsRange, this, range);
+      t1.detach();
    }
 }
 
 void CTestWriter::terminate()
 {
+   std::lock_guard <std::mutex> guard(mDataAccess);
    mTerminatedFlag = true;
 }
 
@@ -166,23 +169,39 @@ void CTestWriter::writeTest(int idx)
    }
 }
 
-void CTestWriter::writeTests(tRange range)
+void CTestWriter::writeTestsRange(tRange range)
 {
-   for(int i = range.first; i <= range.second && !mTerminatedFlag; ++i)
+   for(int i = range.first; i <= range.second; ++i)
    {
+      {
+         std::lock_guard <std::mutex> guard(mDataAccess);
+         if(mTerminatedFlag)
+         {
+            break;
+         }
+      }
       writeTest(i);
       ++mTestsWritten;
    }
+   emit log(" [ Info ] " + QString::number(mTestsWritten) + " tests were written\n");
    emit finished(0);
 }
 
-void CTestWriter::writeTests(const tList &list)
+void CTestWriter::writeTestsList(const tList &list)
 {
-   for(std::size_t i = 0; i < list.size() && !mTerminatedFlag; ++i)
+   for(std::size_t i = 0; i < list.size(); ++i)
    {
+      {
+         std::lock_guard <std::mutex> guard(mDataAccess);
+         if(mTerminatedFlag)
+         {
+            break;
+         }
+      }
       writeTest(list[i]);
       ++mTestsWritten;
    }
+   emit log(" [ Info ] " + QString::number(mTestsWritten) + " tests were written\n");
    emit finished(0);
 }
 

@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include <mutex>
+#include <thread>
+
 #include "framework/commands/CTerminalCommandBase.hpp"
 #include "framework/commands/testCommand/CTestProvider.hpp"
 #include "framework/commands/testCommand/TestCommandHelper.hpp"
@@ -25,8 +28,8 @@ public: // methods
 
 private: // methods
     void writeTest(int idx);
-    void writeTests(tRange range);
-    void writeTests(const tList& list);
+    void writeTestsRange(tRange range);
+    void writeTestsList(const tList& list);
 private: // fields
     QStringList mArgs;
     bool mTerminatedFlag;
@@ -36,6 +39,7 @@ private: // fields
     int mNumLength;
     int mStartFrom;
     int mTestsWritten;
+    std::mutex mDataAccess;
 };
 
 } // namespace NCommand

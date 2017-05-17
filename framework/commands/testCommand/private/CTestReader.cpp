@@ -82,7 +82,8 @@ void CTestReader::run()
          if(validateList(list, 1000))
          {
             qDebug () << "list " << QVector<int>::fromStdVector(list);
-            readTests(list);
+            std::thread t1(&CTestReader::readTestsList, this, list);
+            t1.detach();
          }
          else
          {
@@ -96,7 +97,8 @@ void CTestReader::run()
          tRange range = parseRange(toRead);
          if(validateRange(range, 1000))
          {
-            readTests(range);
+            std::thread t1(&CTestReader::readTestsRange, this, range);
+            t1.detach();
          }
          else
          {
@@ -109,12 +111,14 @@ void CTestReader::run()
    else
    {
       tRange range(1, 1000);
-      readTests(range);
+      std::thread t1(&CTestReader::readTestsRange, this, range);
+      t1.detach();
    }
 }
 
 void CTestReader::terminate()
 {
+   std::lock_guard<std::mutex> guard(mDataAccess);
    mTerminatedFlag = true;
 }
 
@@ -160,10 +164,17 @@ tTest CTestReader::readTest(int idx)
    return test;
 }
 
-void CTestReader::readTests(tRange range)
+void CTestReader::readTestsRange(tRange range)
 {
-   for(int i = range.first; i <= range.second && !mTerminatedFlag; ++i)
+   for(int i = range.first; i <= range.second; ++i)
    {
+      {
+         std::lock_guard <std::mutex> guard(mDataAccess);
+         if(mTerminatedFlag)
+         {
+            break;
+         }
+      }
       tTest test = readTest(i);
       if(!test.first.isEmpty() && !test.second.isEmpty())
       {
@@ -175,13 +186,21 @@ void CTestReader::readTests(tRange range)
           break;
       }
    }
+   emit log(" [ Info ] " + QString::number(mTestsRead) + " tests were read\n");
    emit finished(0);
 }
 
-void CTestReader::readTests(const tList &list)
+void CTestReader::readTestsList(const tList &list)
 {
-   for(std::size_t i = 0; i < list.size() && !mTerminatedFlag; ++i)
+   for(std::size_t i = 0; i < list.size(); ++i)
    {
+      {
+         std::lock_guard <std::mutex> guard(mDataAccess);
+         if(mTerminatedFlag)
+         {
+            break;
+         }
+      }
       tTest test = readTest(list[i]);
       if(!test.first.isEmpty() && !test.second.isEmpty())
       {
@@ -193,6 +212,7 @@ void CTestReader::readTests(const tList &list)
           break;
       }
    }
+   emit log(" [ Info ] " + QString::number(mTestsRead) + " tests were read\n");
    emit finished(0);
 }
 
