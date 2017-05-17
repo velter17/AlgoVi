@@ -23,7 +23,8 @@ namespace fs = boost::filesystem;
 fs::path get_absolute_path(const QString& path)
 {
     qDebug () << "get_absolute_path " << path;
-    fs::path p = path.toStdString();
+    QString pathToUse = path.endsWith("/") ? path.mid(0, path.length()-1) : path;
+    fs::path p = pathToUse.toStdString();
     fs::path ret = fs::absolute(p, CWorkingDir::getInstance().getCurrentPath());
     if(!fs::exists(ret))
     {
