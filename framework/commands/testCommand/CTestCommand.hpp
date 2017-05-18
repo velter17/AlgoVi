@@ -11,6 +11,11 @@
 #include "framework/commands/CTerminalCommandBase.hpp"
 #include "framework/commands/testCommand/TestCommandHelper.hpp"
 
+namespace NAlgoViGUI
+{
+class CTestEditor;
+}
+
 namespace NCommand
 {
 
@@ -35,11 +40,13 @@ private: // methods
     void createTest();
     void swapTests();
     void moveTest();
+    void editTest();
 
 private: // fields
     QStringList mArgs;
     boost::program_options::variables_map mVarMap;
     std::shared_ptr <CTestCreator> mTestCreator;
+    std::shared_ptr <NAlgoViGUI::CTestEditor> mTestEditor;
 };
 
 } // namespace NCommand

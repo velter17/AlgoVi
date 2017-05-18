@@ -42,6 +42,7 @@ add_library ( ${TERMINAL_COMMANDS_LIB_NAME} STATIC ${TERMINAL_COMMANDS_LIB_SOURC
 
 target_link_libraries ( ${TERMINAL_COMMANDS_LIB_NAME}
     ${Boost_LIBRARIES}
+    ${ALGOVI_GUI_LIB_NAME}
     )
 
 qt5_use_modules ( ${TERMINAL_COMMANDS_LIB_NAME} Core)

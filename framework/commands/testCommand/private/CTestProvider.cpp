@@ -33,6 +33,15 @@ void CTestProvider::addTest(const tTest& test)
     mData.push_back(t);
 }
 
+void CTestProvider::setTest(int idx, const tTest &test)
+{
+   if(idx >= mData.size())
+   {
+      return;
+   }
+   mData[idx] = test;
+}
+
 const tTest& CTestProvider::getTest(int idx)
 {
     if(idx >= mData.size())

@@ -6,12 +6,14 @@
  * @date     09.05.2017
  */
 
+#include <QDebug>
 #include <QVector>
 
 #include "framework/commands/testCommand/CTestCommand.hpp"
 #include "framework/commands/testCommand/CTestProvider.hpp"
 #include "framework/commands/testCommand/TableDrawer.hpp"
 #include "framework/commands/testCommand/TestCommandHelper.hpp"
+#include "gui/CTestEditor.hpp"
 
 namespace NCommand
 {
@@ -64,6 +66,10 @@ CTestCommand::CTestCommand()
       ("delete,d", boost::program_options::value<std::string>(), "delete tests")
       ("create", boost::program_options::bool_switch()->default_value(false),
          "create test by typing")
+      ("edit,e", boost::program_options::value <int>(),
+         "edit test")
+      ("win,w", boost::program_options::bool_switch()->default_value(false),
+         "create/edit tests using separate window")
       ("swap", boost::program_options::value<std::string>(), "swap tests => a-b")
       ("move", boost::program_options::value<std::string>(), "move test a to b => a-b");
 
@@ -92,6 +98,10 @@ void CTestCommand::run()
    else if(mVarMap["create"].as<bool>())
    {
       createTest();
+   }
+   else if(mVarMap.count("edit"))
+   {
+      editTest();
    }
    else if(mVarMap.count("swap"))
    {
@@ -124,6 +134,8 @@ void CTestCommand::appendData(const QString& str)
       {
          mTestCreator->appendOutput(str);
          CTestProvider::getInstance().addTest(mTestCreator->getTest());
+         emit log(" [ Info ] test was added [number " +
+                  QString::number(CTestProvider::getInstance().size()) + "]\n");
          emit finished(0);
       }
    }
@@ -135,6 +147,10 @@ void CTestCommand::terminate()
    {
       mTestCreator.reset();
       emit finished(1);
+   }
+   else if(0 != mTestEditor)
+   {
+      mTestEditor->terminate();
    }
 }
 
@@ -260,9 +276,28 @@ void CTestCommand::deleteTests()
 
 void CTestCommand::createTest()
 {
-   mTestCreator.reset(new CTestCreator());
-   mTestCreator->setMode(0);
-   emit log("Input:\n");
+   if(mVarMap["win"].as<bool>())
+   {
+      mTestEditor.reset(new NAlgoViGUI::CTestEditor(NAlgoViGUI::CTestEditorSettings().setReadOnly(false)));
+      connect(mTestEditor.get(), &NAlgoViGUI::CTestEditor::canceled, [this](){
+         qDebug() << "testEditor :: canceled";
+         emit finished(1);
+      });
+      connect(mTestEditor.get(), &NAlgoViGUI::CTestEditor::ok, [this](const tTest& test){
+         CTestProvider::getInstance().addTest(test);
+         emit log(" [ Info ] test was added [number " +
+                  QString::number(CTestProvider::getInstance().size()) + "]\n");
+         mTestEditor->close();
+         emit finished(0);
+      });
+      mTestEditor->show();
+   }
+   else
+   {
+      mTestCreator.reset(new CTestCreator());
+      mTestCreator->setMode(0);
+      emit log("Input:\n");
+   }
 }
 
 void CTestCommand::swapTests()
@@ -290,6 +325,32 @@ void CTestCommand::moveTest()
    else
    {
       emit log("invalid positions to move\n");
+   }
+}
+
+void CTestCommand::editTest()
+{
+   int testNum = mVarMap["edit"].as<int>();
+   if(testNum < 1 || testNum > CTestProvider::getInstance().size())
+   {
+      emit error(" [ Error ] Wrong test number to edit\n");
+      emit finished(1);
+   }
+   else
+   {
+      mTestEditor.reset(new NAlgoViGUI::CTestEditor(
+                           NAlgoViGUI::CTestEditorSettings().setReadOnly(false)
+                                                            .setTest(CTestProvider::getInstance().getTest(testNum-1))));
+      connect(mTestEditor.get(), &NAlgoViGUI::CTestEditor::canceled, [this](){
+         emit finished(1);
+      });
+      connect(mTestEditor.get(), &NAlgoViGUI::CTestEditor::ok, [this, testNum](const tTest& test){
+         CTestProvider::getInstance().setTest(testNum-1, test);
+         emit log(" [ Info ] test was changed\n");
+         mTestEditor->close();
+         emit finished(0);
+      });
+      mTestEditor->show();
    }
 }
 

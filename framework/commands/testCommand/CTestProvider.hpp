@@ -22,6 +22,7 @@ class CTestProvider
 public: // methods
     static CTestProvider& getInstance();
     void addTest(const tTest& test);
+    void setTest(int idx, const tTest& test);
     const tTest& getTest(int idx);
     tShortTest getShortTest(int idx);
     void erase(int idx);

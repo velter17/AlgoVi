@@ -1,3 +1,5 @@
 INCLUDE_DIRECTORIES ( testlib )
-
 ADD_SUBDIRECTORY ( testlib )
+
+INCLUDE_DIRECTORIES ( novileEditor )
+ADD_SUBDIRECTORY ( novileEditor )
