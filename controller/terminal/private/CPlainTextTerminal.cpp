@@ -168,6 +168,7 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent 
     {
         setWriter(WriterType::System);
         displayHtmlText("<font color=yellow>^C</font>");
+        mInputBuffer.clear();
         emit termination();
         return;
     }
@@ -203,13 +204,32 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent 
        mWidget->pressKeyDefault(e);
    }
 
+   auto enterLogic = [this](){
+      qDebug () << "CPlainTextTerminal::keyPressEvent() enter pressed, newData: " << mInputBuffer;
+      emit newData(mInputBuffer);
+      mWidget->textCursor().insertBlock();
+      mInputBuffer.clear();
+   };
+
+   auto enterCtrlLogic = [this](){
+
+      mInputBuffer += "\n";
+      displayHtmlText("<br>");
+      mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
+   };
+
    /* enter + ctrl */
    if((e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) &&
        e->modifiers() == Qt::ControlModifier)
    {
-      mInputBuffer += "\n";
-      displayHtmlText("<br>");
-      mWidget->verticalScrollBar()->setValue(mWidget->verticalScrollBar()->maximum());
+      if(!mRevCtrlLogic)
+      {
+         enterCtrlLogic();
+      }
+      else
+      {
+         enterLogic();
+      }
    }
 
    /* enter */
@@ -217,10 +237,14 @@ void CPlainTextTerminal::keyPressHandler<TerminalMode::InsideProcess>(QKeyEvent 
       (e->modifiers() == Qt::NoModifier ||
       e->modifiers() == Qt::KeypadModifier))
    {
-       qDebug () << "CPlainTextTerminal::keyPressEvent() enter pressed, newData: " << mInputBuffer;
-       emit newData(mInputBuffer);
-       mWidget->textCursor().insertBlock();
-       mInputBuffer.clear();
+      if(!mRevCtrlLogic)
+      {
+         enterLogic();
+      }
+      else
+      {
+         enterCtrlLogic();
+      }
    }
 }
 

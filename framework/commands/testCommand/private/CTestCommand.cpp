@@ -66,6 +66,8 @@ CTestCommand::CTestCommand()
          "create test by typing")
       ("swap", boost::program_options::value<std::string>(), "swap tests => a-b")
       ("move", boost::program_options::value<std::string>(), "move test a to b => a-b");
+
+   mSettings.setRevCtrlLogic(true);
 }
 
 void CTestCommand::run()

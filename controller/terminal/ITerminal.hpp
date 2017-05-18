@@ -13,9 +13,15 @@
 #include <memory>
 
 #include "framework/complation/CComplationProvider.hpp"
+#include "framework/common/ClassGenerators.hpp"
 
 namespace NController
 {
+
+class CommandSettings
+{
+ADD_ATTRIBUTE(CommandSettings, CtrlLogic, bool)
+};
 
 class ITerminal : public QObject
 {
@@ -25,6 +31,7 @@ public slots:
     virtual void unlock() = 0;
     virtual void setQuestionMode() = 0;
     virtual void setInsideProcessMode() = 0;
+    virtual void setCommandSettings(const CommandSettings& settings) = 0;
 
     virtual void appendSimpleText(const QString& text) = 0;
     virtual void appendHtmlText(const QString& text) = 0;

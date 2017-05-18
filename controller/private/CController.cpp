@@ -75,4 +75,10 @@ void CController::unlockTerminal()
    mGUIPtr->getTerminal()->unlock();
 }
 
+void CController::setTerminalRevCtrlLogic()
+{
+   qDebug() << "set terminal rev ctrl logic";
+   mGUIPtr->getTerminal()->setCommandSettings(CommandSettings().setCtrlLogic(true));
+}
+
 } // namespace NController

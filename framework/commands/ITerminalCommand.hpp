@@ -12,9 +12,15 @@
 #include <QStringList>
 
 #include "framework/commands/ITerminalSignals.hpp"
+#include "framework/common/ClassGenerators.hpp"
 
 namespace NCommand
 {
+
+class CSettings
+{
+ADD_ATTRIBUTE(CSettings, RevCtrlLogic, bool)
+};
 
 /**
  * Interface of terminal command
@@ -33,6 +39,8 @@ public slots:
 
     virtual void setWorkingDirectory(const QString& dir) = 0;
     virtual void setWorkingTime(uint32_t time) = 0;
+
+    virtual CSettings getSettings() = 0;
 
 signals:
     void started();

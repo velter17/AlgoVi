@@ -44,6 +44,7 @@ public slots:
     void setInsideAppMode();
     void lockTerminal();
     void unlockTerminal();
+    void setTerminalRevCtrlLogic();
 
 private: // fields
     std::shared_ptr<NAlgoVi::CAlgoViSystem> mSystemPtr;

@@ -58,6 +58,13 @@ void CTerminalBase::setInsideProcessMode()
    mPrevMode = mMode;
    mMode = TerminalMode::InsideProcess;
    setWriter(WriterType::System);
+
+   mRevCtrlLogic = false;
+}
+
+void CTerminalBase::setCommandSettings(const CommandSettings& settings)
+{
+   mRevCtrlLogic = settings.getCtrlLogic();
 }
 
 void CTerminalBase::setComplation(std::shared_ptr<NCommand::CComplationProvider> provider)

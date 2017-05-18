@@ -34,6 +34,10 @@ inline CJobBase<T>::CJobBase(NController::CController* controller)
    : mControllerPtr(controller)
 {
    mProc = new T();
+   if(mProc->getSettings().getRevCtrlLogic())
+   {
+      mControllerPtr->setTerminalRevCtrlLogic();
+   }
 }
 
 template <typename T>

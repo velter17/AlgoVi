@@ -43,6 +43,7 @@ public: // methods
     void unlock() override;
     void setQuestionMode() override;
     void setInsideProcessMode() override;
+    void setCommandSettings(const CommandSettings& settings) override;
 
     void setComplation(std::shared_ptr<NCommand::CComplationProvider> provider) override;
 
@@ -64,6 +65,7 @@ protected: // fields
     QString mPromptMessage;
     int mPromptMessageLength;
     std::shared_ptr <NCommand::CComplationProvider> mComplationProvider;
+    bool mRevCtrlLogic;
 };
 
 } // namespace NController

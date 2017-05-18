@@ -23,6 +23,8 @@ CTerminalCommandBase::CTerminalCommandBase()
     mOptions.add_options()
         ("help,h", "show help message")
           ("manual,?", "detailed help message (manual)");
+
+    mSettings.setRevCtrlLogic(false);
 }
 
 CTerminalCommandBase::~CTerminalCommandBase()
@@ -56,6 +58,11 @@ void CTerminalCommandBase::setArgs(const QStringList& args)
 {
    // for commands, which have not arguments
    qDebug () << "Warning: unexpected setArgs function calling";
+}
+
+CSettings CTerminalCommandBase::getSettings()
+{
+   return mSettings;
 }
 
 QStringList CTerminalCommandBase::getOptionsList()

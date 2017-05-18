@@ -28,6 +28,8 @@ public: // methods
     void setWorkingTime(uint32_t time) override;
     void setArgs(const QStringList& args);
 
+    CSettings getSettings() override;
+
     QStringList getOptionsList();
     QStringList getOptionValues(const QString& option);
 
@@ -45,6 +47,7 @@ protected: // fields
     boost::program_options::positional_options_description mOptionsPositional;
     QMap<QString, QStringList> mOptionValues;
     uint32_t mWorkingTime;
+    CSettings mSettings;
 };
 
 } // namespace NCommand
