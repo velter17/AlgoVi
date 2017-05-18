@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<TerminalSettings>
+    <HomeDir> $HOME </HomeDir>
+    <Title>"AlgoVi | Beta 1.0"</Title>
+    <Font size="12"> monospace </Font>
+    <HistorySize>500</HistorySize>
+
+    <Color name = "background" > #000000 </Color>
+    <Color name = "main"       > #00FF00 </Color>
+    <Color name = "output"     > #FFFFFF </Color>
+    <Color name = "error"      > #FF3333 </Color>
+</TerminalSettings>

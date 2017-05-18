@@ -9,6 +9,7 @@ add_library ( ${ALGOVI_CONTROLLER_LIB_NAME} STATIC ${ALGOVI_CONTROLLER_LIB_SOURC
 
 target_link_libraries ( ${ALGOVI_CONTROLLER_LIB_NAME}
    ${ALGOVI_GUI_LIB_NAME}
+   ${SETTINGS_LIB_NAME}
 )
 
 qt5_use_modules ( ${ALGOVI_CONTROLLER_LIB_NAME} Widgets Core)

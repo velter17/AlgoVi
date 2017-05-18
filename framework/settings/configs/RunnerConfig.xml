@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<RunnerSettings>
+    <Language name = "c++"     extension="cpp"/>
+    <language name = "java"    extension="java"/>
+    <Language name = "haskell" extension="hs"/>
+    <Language name = "python"  extension="py"/>
+
+    <Compiler name = "c++">
+        g++ -std=c++11 -w -O2 $SRC_PATH$ -o $BIN_PATH$
+    </Compiler>
+    <Compiler name = "java">
+        javac -d $BIN_PATH$ $SRC_PATH$
+    </Compiler>
+    <Compiler name = "haskell">
+        ghc -o $BIN_PATH$ $SRC_PATH$
+    </Compiler>
+
+    <Runner name = "c++"    > $BIN_PATH$                    </Runner>
+    <Runner name = "java"   > java $BIN_PATH$               </Runner>
+    <Runner name = "python" > /usr/bin/python ./$SRC_PATH   </Runner>
+
+    <DebugCleaner name = "c++"> /home/dsadovyi/Code/debug_cleaner.cpp </DebugCleaner>
+</RunnerSettings>
+
+
+
+

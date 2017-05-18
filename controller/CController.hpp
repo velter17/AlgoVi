@@ -46,6 +46,9 @@ public slots:
     void unlockTerminal();
     void setTerminalRevCtrlLogic();
 
+private: // methods
+    bool readConfigs();
+
 private: // fields
     std::shared_ptr<NAlgoVi::CAlgoViSystem> mSystemPtr;
     std::shared_ptr<NMainWindow::CMainWindow> mGUIPtr;

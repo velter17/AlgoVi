@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CommandSettings>
+    <Command name = "ls"    >  ls    </Command>
+    <Command name = "cat"   >  cat   </Command>
+    <Command name = "mkdir" >  mkdir </Command>
+    <Command name = "rm"    >  rm    </Command>
+    <Command name = "pwd"   >  pwd   </Command>
+    <Command name = "date"  >  date  </Command>
+    <Command name = "cp"    >  cp    </Command>
+    <Command name = "mv"    >  mv    </Command>
+</CommandSettings>

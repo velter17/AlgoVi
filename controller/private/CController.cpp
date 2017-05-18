@@ -9,30 +9,40 @@
 #include <QDebug>
 
 #include "algovi/system/CAlgoViSystem.hpp"
+#include "controller/CController.hpp"
 #include "controller/terminal/ITerminal.hpp"
+#include "framework/settings/readers/CCommandConfigReader.hpp"
+#include "framework/settings/readers/CRunnerConfigReader.hpp"
+#include "framework/settings/readers/CTerminalConfigReader.hpp"
 #include "gui/CMainWindow.hpp"
-#include "../CController.hpp"
 
 namespace NController
 {
 
 CController::CController()
 {
-   mGUIPtr.reset(new NMainWindow::CMainWindow());
-   mSystemPtr.reset(new NAlgoVi::CAlgoViSystem(this));
-
-   QObject::connect(mSystemPtr.get(), SIGNAL(log(QString)), mGUIPtr->getTerminal(), SLOT(appendSimpleText(QString)), Qt::QueuedConnection);
-   QObject::connect(mGUIPtr->getTerminal(), &ITerminal::command, [this](const QString& cmd)
+   if(readConfigs())
    {
-      qDebug () << "CController:: new command: " << cmd;
-      mGUIPtr->getTerminal()->setInsideProcessMode();
-      mSystemPtr->executeCommand(cmd);
-   });
-   QObject::connect(mGUIPtr->getTerminal(), SIGNAL(newData(QString)), mSystemPtr.get(), SLOT(appendData(QString)), Qt::QueuedConnection);
-   QObject::connect(mSystemPtr.get(), SIGNAL(finishedCommand()), mGUIPtr->getTerminal(), SLOT(unlock()), Qt::QueuedConnection);
-   QObject::connect(mGUIPtr->getTerminal(), SIGNAL(termination()), mSystemPtr.get(), SLOT(terminateJob()));
+      mGUIPtr.reset(new NMainWindow::CMainWindow());
+      mSystemPtr.reset(new NAlgoVi::CAlgoViSystem(this));
 
-   mGUIPtr->show();
+      QObject::connect(mSystemPtr.get(), SIGNAL(log(QString)), mGUIPtr->getTerminal(), SLOT(appendSimpleText(QString)), Qt::QueuedConnection);
+      QObject::connect(mGUIPtr->getTerminal(), &ITerminal::command, [this](const QString& cmd)
+      {
+         qDebug () << "CController:: new command: " << cmd;
+         mGUIPtr->getTerminal()->setInsideProcessMode();
+         mSystemPtr->executeCommand(cmd);
+      });
+      QObject::connect(mGUIPtr->getTerminal(), SIGNAL(newData(QString)), mSystemPtr.get(), SLOT(appendData(QString)), Qt::QueuedConnection);
+      QObject::connect(mSystemPtr.get(), SIGNAL(finishedCommand()), mGUIPtr->getTerminal(), SLOT(unlock()), Qt::QueuedConnection);
+      QObject::connect(mGUIPtr->getTerminal(), SIGNAL(termination()), mSystemPtr.get(), SLOT(terminateJob()));
+
+      mGUIPtr->show();
+   }
+   else
+   {
+      std::exit(1);
+   }
 }
 
 void CController::setComplation(std::shared_ptr<NCommand::CComplationProvider> provider)
@@ -79,6 +89,40 @@ void CController::setTerminalRevCtrlLogic()
 {
    qDebug() << "set terminal rev ctrl logic";
    mGUIPtr->getTerminal()->setCommandSettings(CommandSettings().setCtrlLogic(true));
+}
+
+bool CController::readConfigs()
+{
+   try
+   {
+      NSettings::CCommandConfigReader cmdReader("configs/CommandConfig.xml");
+      if(!cmdReader.fillSettings())
+      {
+         qDebug () << "Cannot fill command settings from config file";
+         return false;
+      }
+
+      NSettings::CRunnerConfigReader runnerReader("configs/RunnerConfig.xml");
+      if(!runnerReader.fillSettings())
+      {
+         qDebug () << "Cannot fill runner settings from config file";
+         return false;
+      }
+
+      NSettings::CTerminalConfigReader terminalReader("configs/TerminalConfig.xml");
+      if(!terminalReader.fillSettings())
+      {
+         qDebug () << "Cannot fill terminal settings from config file";
+         return false;
+      }
+   }
+   catch(const QString& msg)
+   {
+      qDebug () << msg;
+      return false;
+   }
+
+   return true;
 }
 
 } // namespace NController
