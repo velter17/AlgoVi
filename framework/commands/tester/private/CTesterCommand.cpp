@@ -335,8 +335,8 @@ void CTesterCommand::runTest(int idx, std::function<void()> callback)
               CCell().setData({"output"}).setAlign(TAlign::Center).setColor("#FF9999"),
               CCell().setData({"actual"}).setAlign(TAlign::Center).setColor("#00ffff")},
              {CCell().setData({QString::number(result.getExecutionTime()) + "ms"}),
-              CCell().setData(CTestProvider::getInstance().getTestShort(idx-1).first.split('\n').toVector().toStdVector()),
-              CCell().setData(CTestProvider::getInstance().getTestShort(idx-1).second.split('\n').toVector().toStdVector()),
+              CCell().setData(CTestProvider::getInstance().getShortTest(idx-1).first.toVector().toStdVector()),
+              CCell().setData(CTestProvider::getInstance().getShortTest(idx-1).second.toVector().toStdVector()),
               CCell().setData(result.getOutput().split('\n').toVector().toStdVector())},
              {CCell().setData({getResultTitle(result.getResult())})
                      .setColor(getResultColor(result.getResult()))

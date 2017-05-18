@@ -15,6 +15,7 @@ namespace NCommand
 {
 
 typedef QPair<QString, QString> tTest;
+typedef QPair<QStringList, QStringList> tShortTest;
 
 class CTestProvider
 {
@@ -22,7 +23,7 @@ public: // methods
     static CTestProvider& getInstance();
     void addTest(const tTest& test);
     const tTest& getTest(int idx);
-    tTest getTestShort(int idx);
+    tShortTest getShortTest(int idx);
     void erase(int idx);
     void erase(int from, int to);
     void swap(int a, int b);

@@ -206,11 +206,11 @@ void CTestCommand::printTest(int idx)
              .setColor("#FF9999")
              .setData({"output"})};
 
-   tTest testToPrint = CTestProvider::getInstance().getTestShort(idx-1);
+   tShortTest testToPrint = CTestProvider::getInstance().getShortTest(idx-1);
    std::vector <std::vector <CCell> > table { head };
    table[0][0].setData({QString::number(idx)});
-   QStringList input = testToPrint.first.split('\n');
-   QStringList output = testToPrint.second.split('\n');
+   const QStringList& input = testToPrint.first;
+   const QStringList& output = testToPrint.second;
    table.push_back(std::vector <CCell> {
                       CCell(),
                       CCell().setAlign(TAlign::Left)

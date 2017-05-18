@@ -43,14 +43,36 @@ const tTest& CTestProvider::getTest(int idx)
     return mData[idx];
 }
 
-tTest CTestProvider::getTestShort(int idx)
+tShortTest CTestProvider::getShortTest(int idx)
 {
-   const static int sMaxLen = 150;
+   const static int sMaxLen = 100;
+   const static int sMaxRows = 25;
+
    const tTest& test = getTest(idx);
-   tTest ret;
-   ret.first = test.first.length() > sMaxLen ? test.first.mid(0, sMaxLen) + "\n..." : test.first;
-   ret.second = test.second.length() > sMaxLen ? test.second.mid(0, sMaxLen) + "\n..." : test.second;
-   return ret;
+   QStringList input = test.first.split('\n');
+   if(input.size() > sMaxRows)
+   {
+      input = input.mid(0, sMaxRows);
+      input.append("...");
+      input.append("all size: " + QString::number(test.first.length()));
+   }
+   for(QString& str : input)
+   {
+      str = str.length() > sMaxLen ? str.mid(0, sMaxLen) + " ..." : str;
+   }
+
+   QStringList output = test.second.split('\n');
+   if(output.size() > sMaxRows)
+   {
+      output = output.mid(0, sMaxRows);
+      output.append("...");
+      output.append("all size: " + QString::number(test.second.length()));
+   }
+   for(QString& str : output)
+   {
+      str = str.length() > sMaxLen ? str.mid(0, sMaxLen) + " ..." : str;
+   }
+   return tShortTest(input, output);
 }
 
 void CTestProvider::erase(int idx)
