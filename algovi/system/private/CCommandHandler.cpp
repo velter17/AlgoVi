@@ -27,6 +27,7 @@
 #include "framework/commands/testCommand/CTestReader.hpp"
 #include "framework/commands/testCommand/CTestWriter.hpp"
 #include "framework/commands/tester/CTesterCommand.hpp"
+#include "framework/settings/CCommandSettings.hpp"
 
 namespace NAlgoVi
 {
@@ -48,7 +49,8 @@ CCommandHandler::CCommandHandler(NController::CController* controller)
    mCommandMap.insert("parse",               CommandType::ParseTests);
    mCommandMap.insert("tester",              CommandType::Tester);
 
-   for(const QString& cmd : CInternalSystemCommand::getCommandList())
+   for(const QString& cmd :
+       NSettings::CCommandSettings::getInstance().getCommands().keys())
    {
        mCommandMap.insert(cmd, CommandType::InternalSystem);
    }

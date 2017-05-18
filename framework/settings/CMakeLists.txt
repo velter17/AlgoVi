@@ -9,6 +9,9 @@ set ( SETTINGS_LIB_SOURCES
    "readers/private/CTerminalConfigReader.cpp"
    "readers/CRunnerConfigReader.hpp"
    "readers/private/CRunnerConfigReader.cpp"
+   "CCommandSettings.hpp"
+   "CRunnerSettings.hpp"
+   "CTerminalSettings.hpp"
     )
 
 add_library ( ${SETTINGS_LIB_NAME} STATIC ${SETTINGS_LIB_SOURCES} )

@@ -19,3 +19,18 @@
       } \
    private: \
       type m##name;
+
+#define SINGLETON_CLASS_BASE(classname) \
+    public: \
+        static classname& getInstance() \
+        { \
+            static classname instance; \
+            return instance; \
+        } \
+    private: \
+        classname(const classname& other) = delete; \
+        classname operator=(const classname& other) = delete;
+
+#define SINGLETON_CLASS_BASE_CONSTR(classname) \
+    SINGLETON_CLASS_BASE(classname) \
+    classname() {}

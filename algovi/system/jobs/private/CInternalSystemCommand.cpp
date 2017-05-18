@@ -11,13 +11,10 @@
 #include "../CInternalSystemCommand.hpp"
 #include "framework/commands/CSystemCommand.hpp"
 #include "framework/filesystem/filesystem.hpp"
+#include "framework/settings/CCommandSettings.hpp"
 
 namespace NAlgoVi
 {
-
-const QStringList CInternalSystemCommand::sAllowedCommands = {
-    "ls", "mkdir", "rm", "pwd", "cat", "echo", "printf", "date", "time"
-};
 
 CInternalSystemCommand::CInternalSystemCommand(NController::CController* controller)
     : mControllerPtr(controller)
@@ -28,6 +25,14 @@ CInternalSystemCommand::CInternalSystemCommand(NController::CController* control
 void CInternalSystemCommand::run(const QStringList& args)
 {
     emit started();
+    if(args.isEmpty() || NSettings::CCommandSettings::getInstance()
+            .getCommands().find(*args.begin()) ==
+            NSettings::CCommandSettings::getInstance().getCommands().end())
+    {
+        mControllerPtr->handleError(" [ Error ] no cmd str for command " + (*args.begin()) +
+                                    " [internal error]\n");
+        emit finished();
+    }
     mCommandPtr = new NCommand::CSystemCommand();
     connect(mCommandPtr, SIGNAL(log(QString)), mControllerPtr, SLOT(handleLog(QString)));
     connect(mCommandPtr, SIGNAL(error(QString)), mControllerPtr, SLOT(handleError(QString)));
@@ -37,7 +42,8 @@ void CInternalSystemCommand::run(const QStringList& args)
         emit finished();
         mCommandPtr->deleteLater();
     });
-    mCommandPtr->setArgs(args);
+    QString propCommand = NSettings::CCommandSettings::getInstance().getCommands()[*args.begin()];
+    mCommandPtr->setArgs(QStringList() << propCommand);
     mCommandPtr->setWorkingDirectory(NFileSystem::get_current_dir());
     mCommandPtr->run();
 }
@@ -50,11 +56,6 @@ void CInternalSystemCommand::appendData(const QString& data)
 void CInternalSystemCommand::terminate()
 {
     mCommandPtr->terminate();
-}
-
-QStringList CInternalSystemCommand::getCommandList()
-{
-    return sAllowedCommands;
 }
 
 } // namespace NAlgoVi

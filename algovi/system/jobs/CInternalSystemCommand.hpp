@@ -30,14 +30,9 @@ public: // methods
     void appendData(const QString& data) override;
     void terminate() override;
 
-public: // static methods
-    static QStringList getCommandList();
-
 private: // fields
     NCommand::CSystemCommand* mCommandPtr;
     NController::CController* mControllerPtr;
-private: // static fields
-    const static QStringList sAllowedCommands;
 };
 
 } // namespace NAlgoVi

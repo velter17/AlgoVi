@@ -27,7 +27,7 @@ set ( BOOST_USE_MULTITHREADED ON )
 include_directories( ${PROJECT_SOURCE_DIR} )
 include_directories ( ${Boost_INCLUDE_DIRS} )
 
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread" )
 
 if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
     set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEBUD_OUTPUT" )
