@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <RunnerSettings>
     <Language name = "c++"     extension="cpp"/>
-    <language name = "java"    extension="java"/>
+    <Language name = "java"    extension="java"/>
     <Language name = "haskell" extension="hs"/>
     <Language name = "python"  extension="py"/>
+    <Language name = "binary"  extension="exe" />
 
     <Compiler name = "c++">
         g++ -std=c++11 -w -O2 $SRC_PATH$ -o $BIN_PATH$

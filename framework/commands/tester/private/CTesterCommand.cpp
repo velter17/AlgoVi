@@ -15,6 +15,7 @@
 #include "framework/filesystem/filesystem.hpp"
 #include "framework/commands/testCommand/TableDrawer.hpp"
 #include "framework/commands/executor/DebugHelper.hpp"
+#include "framework/settings/CRunnerSettings.hpp"
 
 namespace
 {
@@ -253,14 +254,14 @@ void CTesterCommand::compile()
          CCompiler::SCompilerTask(
             mCodePath,
             QStringList(),
-            getProgLanguageType(NFileSystem::get_file_extension(mCodePath).toStdString()))
+            NSettings::parseProgLanguage(mCodePath))
       };
    if(mCustomChecker)
    {
       tasks.push_back(CCompiler::SCompilerTask(
                          mCheckerPath,
                          QStringList(),
-                         getProgLanguageType(NFileSystem::get_file_extension(mCheckerPath).toStdString())));
+                         NSettings::parseProgLanguage(mCheckerPath)));
    }
 
    CCompiler* compiler = new CCompiler(tasks);

@@ -15,6 +15,7 @@
 #include "framework/commands/ProcessHelper.hpp"
 #include "framework/filesystem/filesystem.hpp"
 #include "framework/commands/testCommand/CTestProvider.hpp"
+#include "framework/settings/CRunnerSettings.hpp"
 
 namespace
 {
@@ -164,8 +165,7 @@ void CParserCommand::readUrl(int tries)
 
 void CParserCommand::compileParser()
 {
-   QString extension = NFileSystem::get_file_extension(mParserPath);
-   ProgLanguage::EType lang = getProgLanguageType(extension.toStdString());
+   QString lang = NSettings::parseProgLanguage(mParserPath);
    CCompiler* compiler = new CCompiler({CCompiler::SCompilerTask(mParserPath, QStringList(), lang)});
    connect(compiler, &CCompiler::log, [this](const QString& msg){
        emit log(msg);

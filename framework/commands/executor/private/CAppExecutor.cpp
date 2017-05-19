@@ -16,6 +16,7 @@
 #include "framework/commands/ProcessHelper.hpp"
 #include "framework/commands/testCommand/CTestProvider.hpp"
 #include "framework/commands/executor/DebugHelper.hpp"
+#include "framework/settings/CRunnerSettings.hpp"
 
 
 namespace NCommand
@@ -52,7 +53,12 @@ CAppExecutor::CAppExecutor()
 //        ("test-save", boost::program_options::bool_switch(),
     //            "save test after execution");
 
-    mOptionValues["--lang"].append(getProgLanguageList());
+    const NSettings::tContainer& languages = NSettings::CRunnerSettings::getInstance().getLangToExt();
+    qDebug () << "languages: " << languages;
+    for(const QString& lang : languages.keys())
+    {
+       mOptionValues["--lang"].append(lang);
+    }
 }
 
 CAppExecutor::~CAppExecutor()
@@ -79,7 +85,7 @@ void CAppExecutor::run()
        return;
     }
 
-    ProgLanguage::EType language = parseProgLanguage(varMap);
+    QString language = parseProgLanguage(varMap);
 
     QStringList flags;
     for(const std::string& str : mParsedFlags)
@@ -160,7 +166,7 @@ uint32_t CAppExecutor::getExecutionTime()
 void CAppExecutor::compileCode(const QString& codePath,
                                const QStringList& flags,
                                const QStringList& args,
-                               ProgLanguage::EType lang)
+                               const QString& lang)
 {
     QString codeToCompile;
     if(mRemoveDebug)
@@ -335,19 +341,20 @@ void CAppExecutor::runApp(const QString& appPath, const QStringList& args)
     mProcess->start(appPath, args, QProcess::Unbuffered | QProcess::ReadWrite);
 }
 
-ProgLanguage::EType CAppExecutor::parseProgLanguage(
+QString CAppExecutor::parseProgLanguage(
         boost::program_options::variables_map& varMap)
 {
+    QString ret;
     if(varMap.count("lang"))
     {
-        return getProgLanguageType(varMap["lang"].as<std::string>());
+        ret = QString::fromStdString(varMap["lang"].as<std::string>());
     }
     else
     {
-        QString extension = NFileSystem::get_file_extension(
-                    QString::fromStdString(varMap["src"].as<std::string>()));
-        return getProgLanguageType(extension.toStdString());
+        QString src = QString::fromStdString(varMap["src"].as<std::string>());
+        ret = NSettings::parseProgLanguage(src);
     }
+    return ret;
 }
 
 

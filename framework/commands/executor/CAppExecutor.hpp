@@ -13,7 +13,6 @@
 #include <QTimer>
 
 #include "framework/commands/CCompiler.hpp"
-#include "framework/commands/TProgLanguages.hpp"
 
 namespace NCommand
 {
@@ -61,9 +60,9 @@ private: // methods
     void compileCode(const QString& codePath,
                      const QStringList& flags,
                      const QStringList& args,
-                     ProgLanguage::EType lang);
+                     const QString& lang);
     void runApp(const QString& appPath, const QStringList& args);
-    ProgLanguage::EType parseProgLanguage(
+    QString parseProgLanguage(
             boost::program_options::variables_map& varMap);
 private: // fields
     QProcess* mProcess;

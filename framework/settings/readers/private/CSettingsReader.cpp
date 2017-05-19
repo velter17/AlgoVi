@@ -53,6 +53,11 @@ QVector<CSettingsData> CSettingsReader::readConfig()
    QDomNode node = document.firstChildElement().firstChild();
    while(!node.isNull())
    {
+      if(node.isComment())
+      {
+         node = node.nextSibling();
+         continue;
+      }
       if(!node.isElement())
       {
          throw QString("invalid config structure");

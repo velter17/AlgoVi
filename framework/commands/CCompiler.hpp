@@ -9,7 +9,6 @@
 #pragma once
 
 #include "framework/commands/CTerminalCommandBase.hpp"
-#include "framework/commands/TProgLanguages.hpp"
 
 namespace NCommand
 {
@@ -21,11 +20,11 @@ public: // types
     {
         QString mCodePath;
         QStringList mFlags;
-        ProgLanguage::EType mLanguage;
+        QString mLanguage;
         bool mForced;
         SCompilerTask(const QString& codePath,
                       const QStringList& flags,
-                      ProgLanguage::EType lang,
+                      const QString& lang,
                       bool forced = false)
             : mCodePath(codePath)
             , mFlags(flags)

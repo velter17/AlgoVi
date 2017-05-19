@@ -14,6 +14,7 @@
 
 #include "framework/commands/private/CCompilerExecutor.hpp"
 #include "framework/commands/CSystemCommand.hpp"
+#include "framework/settings/CRunnerSettings.hpp"
 
 namespace NCommand
 {
@@ -99,23 +100,21 @@ CCompilerExecutor::CCompilerExecutor()
 
 void CCompilerExecutor::compile(const QString& codePath,
                                 const QStringList& flags,
-                                ProgLanguage::EType lang,
+                                const QString &lang,
                                 bool forced)
 {
     qDebug () << "CCompilerExecutor::compile " << codePath << " " << flags;
     emit started();
-    if(lang == ProgLanguage::BINARY)
+
+    const NSettings::tContainer& compilers = NSettings::CRunnerSettings::getInstance().getCompilers();
+
+    if(lang == "binary")
     {
         emit finished(codePath);
         return;
     }
     else
     {
-        // TODO config file instead of "const static..."
-        const static QString cppCompilerStr = "g++ -std=c++11 -w -O2 $SRC_PATH$ -o $BIN_PATH$";
-        const static QString javaCompilerStr = "javac -d $BIN_PATH$ $SRC_PATH$";
-        const static QString haskellCompilerStr = "ghc -o $BIN_PATH$ $SRC_PATH$";
-
         CCompilerStorage::SData& data = CCompilerStorage::getInstance().getData(codePath);
         if(!forced && !data.isModified() && flags == data.mFlags)
         {
@@ -123,21 +122,8 @@ void CCompilerExecutor::compile(const QString& codePath,
             return;
         }
 
-        // TODO fix lang identification
-        QString compilerStr;
-        if(lang == ProgLanguage::CPP)
-        {
-           compilerStr = cppCompilerStr;
-        }
-        else if(lang == ProgLanguage::JAVA)
-        {
-           compilerStr = javaCompilerStr;
-        }
-        else if(lang == ProgLanguage::HASKELL)
-        {
-           compilerStr = haskellCompilerStr;
-        }
-        emit log(" [ Info ] compilation of " + codePath + " [" + QString::fromStdString(toString(lang)) + "] ...\n");
+        QString compilerStr = NSettings::CRunnerSettings::getInstance().getCompilers()[lang];
+        emit log(" [ Info ] compilation of " + codePath + " [" + lang + "] ...\n");
 
         compilerStr.replace("$SRC_PATH$", data.mCodePath);
         compilerStr.replace("$BIN_PATH$", data.mAppPath);

@@ -9,7 +9,6 @@
 #pragma once
 
 #include "framework/commands/ITerminalSignals.hpp"
-#include "framework/commands/TProgLanguages.hpp"
 
 namespace NCommand
 {
@@ -21,7 +20,7 @@ public: // methods
     CCompilerExecutor();
     void compile(const QString& codePath,
                  const QStringList& flags,
-                 ProgLanguage::EType lang,
+                 const QString& lang,
                  bool forced);
 
 signals:
