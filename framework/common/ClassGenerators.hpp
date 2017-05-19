@@ -20,6 +20,12 @@
    private: \
       type m##name;
 
+#define ADD_ATTRIBUTE_WITH_REF(classname, name, type) \
+    ADD_ATTRIBUTE(classname, name, type) \
+    public: \
+        type& get##name##Ref() \
+        { return m##name; }
+
 #define SINGLETON_CLASS_BASE(classname) \
     public: \
         static classname& getInstance() \

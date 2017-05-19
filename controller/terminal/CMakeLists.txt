@@ -18,6 +18,7 @@ add_library ( ${TERMINAL_LIB_NAME} STATIC ${TERMINAL_LIB_SOURCES} )
 target_link_libraries ( ${TERMINAL_LIB_NAME}
     ${FILESYSTEM_LIB_NAME}
     ${COMPLATION_LIB_NAME}
+    ${SETTINGS_LIB_NAME}
     )
 
 qt5_use_modules ( ${TERMINAL_LIB_NAME} Widgets Core)

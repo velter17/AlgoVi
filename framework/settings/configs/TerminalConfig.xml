@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <TerminalSettings>
     <HomeDir> $HOME </HomeDir>
-    <Title>"AlgoVi | Beta 1.0"</Title>
     <Font size="12"> monospace </Font>
     <HistorySize>500</HistorySize>
 

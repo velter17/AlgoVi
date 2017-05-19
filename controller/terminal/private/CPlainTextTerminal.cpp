@@ -18,18 +18,10 @@
 #include "controller/terminal/TerminalHelpers.hpp"
 #include "controller/terminal/private/CPlainTextTerminalImpl.hpp"
 #include "framework/common/HtmlConverter.hpp"
+#include "framework/settings/CTerminalSettings.hpp"
 
 namespace NController
 {
-
-QColor CPlainTextTerminal::Colors::Background =
-        QColor(Qt::black);
-QColor CPlainTextTerminal::Colors::Main =
-        QColor(Qt::green);
-QColor CPlainTextTerminal::Colors::Error =
-        "#ff3333";
-QColor CPlainTextTerminal::Colors::Output =
-        QColor(Qt::white);
 
 CPlainTextTerminal::CPlainTextTerminal(QWidget* parent)
     : mWidget(new CPlainTextTerminalImpl(parent))
@@ -37,12 +29,14 @@ CPlainTextTerminal::CPlainTextTerminal(QWidget* parent)
 {
     mHistoryItr = mHistory.end();
 
-    mPalette.setColor(QPalette::Base, Colors::Background);
-    mPalette.setColor(QPalette::Text, Colors::Main);
+    mPalette.setColor(QPalette::Base,
+                      QColor(NSettings::CTerminalSettings::getInstance().getColors()["background"]));
+    mPalette.setColor(QPalette::Text,
+                      QColor(NSettings::CTerminalSettings::getInstance().getColors()["main"]));
     mWidget->setPalette(mPalette);
 
-    QFont font("monospace");
-    font.setPixelSize(12);
+    QFont font(NSettings::CTerminalSettings::getInstance().getFont());
+    font.setPixelSize(NSettings::CTerminalSettings::getInstance().getFontSize());
     mWidget->setFont(font);
 
     connect(mWidget.get(), SIGNAL(keyPressed(QKeyEvent*)), this, SLOT(keyPressAssigner(QKeyEvent*)));
@@ -329,19 +323,22 @@ void CPlainTextTerminal::appendSimpleText(const QString& text)
 {
    qDebug () << "CPlainTextTerminal::appendSimpleText() " << text;
    setWriter(WriterType::System);
-   displayHtmlText(NCommon::colorize(NCommon::convertToHtml(text), Colors::Output.name()));
+   static QString sOutputColor = NSettings::CTerminalSettings::getInstance().getColors()["output"];
+   displayHtmlText(NCommon::colorize(NCommon::convertToHtml(text), sOutputColor));
 }
 
 void CPlainTextTerminal::appendHtmlText(const QString& text)
 {
    qDebug () << "CPlainTextTerminal::appendHtmlText() " << text;
    setWriter(WriterType::System);
-   displayHtmlText(NCommon::colorize(text, Colors::Output.name()));
+   static QString sOutputColor = NSettings::CTerminalSettings::getInstance().getColors()["output"];
+   displayHtmlText(NCommon::colorize(text, sOutputColor));
 }
 
 void CPlainTextTerminal::appendErrorText(const QString& text)
 {
-   displayHtmlText(NCommon::colorize(NCommon::convertToHtml(text), Colors::Error.name()));
+   static QString sErrorColor = NSettings::CTerminalSettings::getInstance().getColors()["error"];
+   displayHtmlText(NCommon::colorize(NCommon::convertToHtml(text), sErrorColor));
 }
 
 QWidget *CPlainTextTerminal::getWidget()
@@ -351,7 +348,8 @@ QWidget *CPlainTextTerminal::getWidget()
 
 void CPlainTextTerminal::displaySimpleText(const QString& text)
 {
-   displayHtmlText(NCommon::colorize(NCommon::convertToHtml(text), Colors::Main.name()));
+   static QString sMainColor = NSettings::CTerminalSettings::getInstance().getColors()["output"];
+   displayHtmlText(NCommon::colorize(NCommon::convertToHtml(text), sMainColor));
 }
 
 void CPlainTextTerminal::displayHtmlText(const QString& text)

@@ -45,13 +45,6 @@ private slots:
     void keyPressAssigner(QKeyEvent* e);
 
 private: // fields
-    struct Colors
-    {
-        static QColor Background;
-        static QColor Main;
-        static QColor Output;
-        static QColor Error;
-    };
     QPalette mPalette;
     QString mInputBuffer;
     int mTabPressCount;
