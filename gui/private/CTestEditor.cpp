@@ -17,6 +17,7 @@
 namespace
 {
 
+#ifdef ALGOVI_HAS_QTWEBKIT
 Novile::Editor* makeEditor(QWidget* parent,
                            const NAlgoViGUI::CTestEditorSettings& settings)
 {
@@ -31,6 +32,7 @@ Novile::Editor* makeEditor(QWidget* parent,
    ret->setCursorPosition(0, 0);
    return ret;
 }
+#endif
 
 }
 
@@ -45,10 +47,14 @@ CTestEditor::CTestEditor(const CTestEditorSettings& settings)
 {
    mMainLayout = new QVBoxLayout;
    QLayout* editorsLayout = new QVBoxLayout;
-
+#ifdef ALGOVI_HAS_QTWEBKIT
    mInputEditor = makeEditor(this, settings);
-   mInputEditor->setText(settings.getTest().first);
    mOutputEditor = makeEditor(this, settings);
+#else
+   mInputEditor = new QTextEdit();
+   mOutputEditor = new QTextEdit();
+#endif
+   mInputEditor->setText(settings.getTest().first);
    mOutputEditor->setText(settings.getTest().second);
 
    editorsLayout->addWidget(new QLabel("Input"));
@@ -113,7 +119,11 @@ void CTestEditor::abort()
 void CTestEditor::finish()
 {
    mFinished = true;
+#if ALGOVI_HAS_QTWEBKIT
    emit ok(tData(mInputEditor->text(), mOutputEditor->text()));
+#else
+   emit ok(tData(mInputEditor->toPlainText(), mOutputEditor->toPlainText()));
+#endif
 }
 
 

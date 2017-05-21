@@ -13,10 +13,15 @@
 
 #include "framework/common/ClassGenerators.hpp"
 
+#ifdef ALGOVI_HAS_QTWEBKIT
 namespace Novile
 {
 class Editor;
 }
+#else
+#include <QTextEdit>
+#endif
+
 
 namespace NAlgoViGUI
 {
@@ -49,8 +54,13 @@ signals:
 
 private: // fields
     QLayout* mMainLayout;
+#ifdef ALGOVI_HAS_QTWEBKIT
     Novile::Editor* mInputEditor;
     Novile::Editor* mOutputEditor;
+#else
+    QTextEdit* mInputEditor;
+    QTextEdit* mOutputEditor;
+#endif
     bool mFinished;
 };
 

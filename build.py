@@ -35,6 +35,7 @@ cmakeArgs = [
     srcPath,
     '-DCMAKE_BUILD_TYPE=' + buildType,
     '-DCMAKE_INSTALL_PREFIX=' + installPath,
+    '-DALGOVI_TARGET_SYSTEM=' + args.target,
 ]
 
 if args.target == "win":

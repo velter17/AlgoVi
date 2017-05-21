@@ -13,7 +13,13 @@ find_package ( Qt5Widgets REQUIRED )
 find_package ( Qt5Quick REQUIRED )                                                                                                                                                               
 find_package ( Qt5Core REQUIRED )                                                                                                                                                                                                          
 find_package ( Qt5Network REQUIRED )                                                                                                                                                                                                       
-find_package ( Qt5Xml REQUIRED )                                                                                                                                                                                                           
+find_package ( Qt5Xml REQUIRED )
+find_package ( Qt5WebKit )
+if( Qt5WebKit_FOUND )
+    message (STATUS "ALGOVI HAS Qt5WebKit")
+    set ( ALGOVI_HAS_QTWEBKIT ON)
+    add_definitions(-DALGOVI_HAS_QTWEBKIT)
+endif()
 find_package ( Boost REQUIRED COMPONENTS 
     filesystem
     system
@@ -34,6 +40,16 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
 endif()
 
 include ( "build/Libraries.cmake" )
+
+IF ( "${ALGOVI_TARGET_SYSTEM}" STREQUAL "" )
+   IF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Windows" )
+      SET (ALGOVI_TARGET_SYSTEM "win32")
+   ELSEIF ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+      SET ( ALGOVI_TARGET_SYSTEM "linux" )
+   ELSE ()
+      MESSAGE ( SEND_ERROR "Unknown target system to build: '${CMAKE_SYSTEM_NAME}'" )
+   ENDIF()
+ENDIF ()
 
 add_subdirectory ( "algovi" )
 add_subdirectory ( "framework" )
