@@ -13,7 +13,7 @@ target_link_libraries( ${ALGOVI_GUI_LIB_NAME}
     ${TERMINAL_LIB_NAME}
     )
 
-if( ALGOVI_HAS_Qt5WebKit )
+if( ALGOVI_HAS_QTWEBKIT )
     target_link_libraries( ${ALGOVI_GUI_LIB_NAME}
 	    ${NOVILE_EDITOR_LIB_NAME}
 	    )
