@@ -7,6 +7,7 @@
  */
 
 #include "../CWorkingDir.hpp"
+#include "framework/settings/CTerminalSettings.hpp"
 
 namespace NFileSystem
 {
@@ -28,9 +29,8 @@ boost::filesystem::path CWorkingDir::getCurrentPath()
 }
 
 CWorkingDir::CWorkingDir()
-    : mCurrentPath("/home/dsadovyi")
+    : mCurrentPath(NSettings::CTerminalSettings::getInstance().getHomeDir().toStdString())
 {
-
 }
 
 } // namespace NFileSystem

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<TerminalSettings>
+    <HomeDir> C:\\ </HomeDir>
+    <Font size="13"> consolas </Font>
+    <HistorySize>500</HistorySize>
+
+    <Color name = "background" > #000000 </Color>
+    <Color name = "main"       > #00FF00 </Color>
+    <Color name = "output"     > #FFFFFF </Color>
+    <Color name = "error"      > #FF3333 </Color>
+</TerminalSettings>

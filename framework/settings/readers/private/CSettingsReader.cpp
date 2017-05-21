@@ -17,12 +17,18 @@ namespace
 QString removeExtraSpaces(const QString& str)
 {
    QString ret = str;
-   while(ret.endsWith(QChar::Space) || ret.endsWith(QChar::Tabulation) || ret.endsWith('\n'))
+   while(ret.endsWith(QChar::Space)
+         || ret.endsWith(QChar::Tabulation)
+         || ret.endsWith('\n')
+         || ret.endsWith('\r'))
    {
       ret.chop(1);
    }
    int idx = 0;
-   while(idx < ret.length() && (ret[idx] == QChar::Space || ret[idx] == QChar::Tabulation || ret[idx].toLatin1() == '\n'))
+   while(idx < ret.length() && (ret[idx] == QChar::Space
+                                || ret[idx] == QChar::Tabulation
+                                || ret[idx].toLatin1() == '\n'
+                                || ret[idx].toLatin1() == '\r'))
    {
       ++idx;
    }

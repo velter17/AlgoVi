@@ -11,8 +11,13 @@ add_library ( ${ALGOVI_GUI_LIB_NAME} STATIC ${ALGOVI_GUI_LIB_SOURCES} )
 
 target_link_libraries( ${ALGOVI_GUI_LIB_NAME}
     ${TERMINAL_LIB_NAME}
-    ${NOVILE_EDITOR_LIB_NAME}
     )
+
+if( ALGOVI_HAS_Qt5WebKit )
+    target_link_libraries( ${ALGOVI_GUI_LIB_NAME}
+	    ${NOVILE_EDITOR_LIB_NAME}
+	    )
+endif()
 
 qt5_use_modules ( ${ALGOVI_GUI_LIB_NAME} Widgets Core)
 

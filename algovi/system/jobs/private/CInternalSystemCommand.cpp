@@ -43,7 +43,7 @@ void CInternalSystemCommand::run(const QStringList& args)
         mCommandPtr->deleteLater();
     });
     QString propCommand = NSettings::CCommandSettings::getInstance().getCommands()[*args.begin()];
-    mCommandPtr->setArgs(QStringList() << propCommand);
+    mCommandPtr->setArgs(QStringList() << propCommand << (args.mid(1)));
     mCommandPtr->setWorkingDirectory(NFileSystem::get_current_dir());
     mCommandPtr->run();
 }

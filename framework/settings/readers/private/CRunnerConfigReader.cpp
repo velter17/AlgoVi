@@ -25,6 +25,7 @@ bool CRunnerConfigReader::fillSettings()
    QVector <CSettingsData> data = readConfig();
    for(const CSettingsData& item : data)
    {
+      qDebug () << item.getName() << " " << item.getAttributes() << " " << item.getValue();
       if(item.getName() == "Language")
       {
          if(item.getAttributes().find("name") == item.getAttributes().end() ||

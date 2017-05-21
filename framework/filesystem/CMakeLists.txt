@@ -11,6 +11,7 @@ add_library ( ${FILESYSTEM_LIB_NAME} STATIC ${FILESYSTEM_LIB_SOURCES} )
 
 target_link_libraries ( ${FILESYSTEM_LIB_NAME}
     ${Boost_LIBRARIES}
+    ${SETTINGS_LIB_NAME}
     )
 
 qt5_use_modules ( ${FILESYSTEM_LIB_NAME} Core)

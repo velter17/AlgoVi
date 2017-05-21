@@ -30,8 +30,17 @@ install (
     ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
     )
 
-install (
-    DIRECTORY "configs"
-    DESTINATION ${INSTALL_BIN_DIR}
-    FILES_MATCHING PATTERN "*.xml"
-)
+if ( "${ALGOVI_TARGET_SYSTEM}" STREQUAL "linux" )
+    install (
+        DIRECTORY "configs/linux/"
+        DESTINATION ${INSTALL_BIN_DIR}
+        FILES_MATCHING PATTERN "*.xml"
+    )
+else()
+    install (
+        DIRECTORY "configs/win/"
+        DESTINATION ${INSTALL_BIN_DIR}/configs
+        FILES_MATCHING PATTERN "*.xml"
+    )
+endif()
+

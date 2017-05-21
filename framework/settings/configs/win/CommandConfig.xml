@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CommandSettings>
+    <Command name = "ls"    >  apps/ls.exe    </Command>
+    <Command name = "cat"   >  apps/cat.exe   </Command>
+    <Command name = "mkdir" >  apps/mkdir.exe </Command>
+    <Command name = "rm"    >  apps/rm.exe    </Command>
+    <Command name = "pwd"   >  apps/pwd.exe   </Command>
+    <Command name = "date"  >  apps/date.exe  </Command>
+    <Command name = "cp"    >  apps/cp.exe    </Command>
+    <Command name = "mv"    >  apps/mv.exe    </Command>
+</CommandSettings>

@@ -7,6 +7,7 @@
  */
 
 #include <QDebug>
+#include <QDir>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -109,8 +110,9 @@ QString get_file_name(const QString& file)
 
 QString get_full_system_path(const QString& path)
 {
+   const std::string appPath = QDir::currentPath().toStdString();
    fs::path p = path.toStdString();
-   fs::path ret = fs::absolute(p);
+   fs::path ret = fs::absolute(p, appPath);
    if(!fs::exists(ret))
    {
        qDebug () << QString::fromStdString(ret.string()) << " does not exist";

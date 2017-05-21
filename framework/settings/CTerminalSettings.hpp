@@ -10,6 +10,7 @@
 
 #include <QVector>
 #include <QString>
+#include <QMap>
 
 #include "framework/common/ClassGenerators.hpp"
 

@@ -10,6 +10,8 @@
 #include <QTimer>
 
 #include "../CSystemCommand.hpp"
+#include "framework/commands/ProcessHelper.hpp"
+#include "framework/filesystem/filesystem.hpp"
 
 namespace NCommand
 {
@@ -56,6 +58,19 @@ void CSystemCommand::run()
       emit finished(code);
       mProc->deleteLater();
    });
+
+   connect(mProc, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
+                                  [this](QProcess::ProcessError err){
+           qDebug () << "CSystemCommand: mProc emitted error" << processErrorToStr(err);
+           if(err == QProcess::FailedToStart)
+           {
+               emit error(processErrorToStr(err) + "\n");
+               mProc->deleteLater();
+               emit finished(1);
+            }
+       });
+
+#ifdef __linux__
    QString appList;
    for(const QString& str : mArgs)
    {
@@ -63,6 +78,20 @@ void CSystemCommand::run()
    }
    mProc->start("bash", QStringList() << "-c" << appList);
    qDebug () << appList << " have started...";
+#else
+   QString app = *mArgs.begin();
+   if(app == "cmd.exe")
+   {
+       mArgs = mArgs.mid(1);
+   }
+   else
+   {
+       mArgs.erase(mArgs.begin());
+       app = NFileSystem::get_full_system_path(app);
+   }
+   mProc->start(app, mArgs);
+   qDebug () << app << " " << mArgs << " have started...";
+#endif
 }
 
 void CSystemCommand::appendData(const QString &str)

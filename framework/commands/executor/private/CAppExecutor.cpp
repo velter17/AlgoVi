@@ -188,6 +188,7 @@ void CAppExecutor::compileCode(const QString& codePath,
         emit log(msg);
     });
     connect(compiler, &CCompiler::error, [this](const QString& msg){
+        qDebug () << "compiler emit error " << msg;
         emit error(msg);
     });
     connect(compiler, &CCompiler::finished, [this, compiler, args](int code){
