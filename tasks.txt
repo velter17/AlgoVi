@@ -15,7 +15,7 @@
 + 23. executor runs on tests
 + 24. parser with defaults
 + 25. test command handle long tests
-26. ability to edit tests
++ 26. ability to edit tests
 + 27. complation with spaces
 + 28. handle wrong spaces in complation
 29. test generator
@@ -25,14 +25,14 @@
 + 33. tle verdict handler
 + 34. test reader and writer runs in separate threads
 35. fix codeforces parser
-36. commands config
-37. compiler config
-38. terminal config
++ 36. commands config
++ 37. compiler config
+ + 38. terminal config
 39. interactive tester
 + 40. executor with debug output
 + 41. complation with value list
 + 42. fix complation dot
 43. manual messages
-44. ability to handle tests in separate window
-45. switch ctrl logic on text input
++ 44. ability to handle tests in separate window
++ 45. switch ctrl logic on text input
 46. draw function base
