@@ -25,6 +25,8 @@ find_package ( Boost REQUIRED COMPONENTS
     system
     program_options
     )
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules/")
+find_package ( CppUnit REQUIRED)
 
 set ( BOOST_USE_STATIC_LIBS ON )
 set ( BOOST_USE_MULTITHREADED ON )
@@ -36,7 +38,7 @@ include_directories ( ${Boost_INCLUDE_DIRS} )
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread" )
 
 if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
-    set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEBUD_OUTPUT" )
+    set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEBUG_OUTPUT" )
 endif()
 
 include ( "build/Libraries.cmake" )
