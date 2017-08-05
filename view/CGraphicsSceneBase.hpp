@@ -24,6 +24,8 @@ public: // methods
     void mousePressEvent(QGraphicsSceneMouseEvent* event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
     void drawForeground(QPainter* painter, const QRectF& rect);
+
+signals:
 };
 
 } // namespace NView

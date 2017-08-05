@@ -6,6 +6,7 @@
  * @date     22.05.2017
  */
 
+#include <QDebug>
 #include <QPainter>
 
 #include "view/CGraphicsSceneBase.hpp"
@@ -28,7 +29,12 @@ CGraphicsSceneBase::~CGraphicsSceneBase()
 
 void CGraphicsSceneBase::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    qDebug () << "Pressed!!!!";
+}
 
+void CGraphicsSceneBase::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    QGraphicsScene::mouseMoveEvent(event);
 }
 
 void CGraphicsSceneBase::drawForeground(QPainter* painter, const QRectF& rect)

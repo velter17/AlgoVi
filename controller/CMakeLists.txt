@@ -11,7 +11,6 @@ target_link_libraries ( ${ALGOVI_CONTROLLER_LIB_NAME}
    ${ALGOVI_GUI_LIB_NAME}
    ${SETTINGS_LIB_NAME}
    ${ALGOVI_SCENE_LIB_NAME} # to delete
-   ${ALGOVI_VIEW_LIB_NAME} # to delete
 )
 
 qt5_use_modules ( ${ALGOVI_CONTROLLER_LIB_NAME} Widgets Core)

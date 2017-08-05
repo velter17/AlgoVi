@@ -23,7 +23,7 @@ public: // methods
     ~CGraphicView();
 
 private: // fields
-    QGraphicsScene* mScenePtr;
+    CGraphicsSceneBase* mScenePtr;
     QLayout* mLayout;
 
 };

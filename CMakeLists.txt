@@ -17,8 +17,8 @@ find_package ( Qt5Xml REQUIRED )
 find_package ( Qt5WebKit )
 if( Qt5WebKit_FOUND )
     message (STATUS "ALGOVI HAS Qt5WebKit")
-    set ( ALGOVI_HAS_QTWEBKIT ON)
-    add_definitions(-DALGOVI_HAS_QTWEBKIT)
+    #    set ( ALGOVI_HAS_QTWEBKIT ON)
+    #    add_definitions(-DALGOVI_HAS_QTWEBKIT)
 endif()
 find_package ( Boost REQUIRED COMPONENTS 
     filesystem

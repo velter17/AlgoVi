@@ -19,7 +19,7 @@ namespace NView
 const int sDefaultWindowHeight = 600;
 const int sDefaultWindowWidth = 600;
 
-CGraphicView::CGraphicView(QGraphicsScene* scene)
+CGraphicView::CGraphicView(CGraphicsSceneBase* scene)
    : mScenePtr(scene)
 {
    mLayout = new QVBoxLayout;

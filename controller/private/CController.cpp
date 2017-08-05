@@ -16,8 +16,8 @@
 #include "framework/settings/readers/CTerminalConfigReader.hpp"
 #include "gui/CMainWindow.hpp"
 
-#include "gui/scene/CGraphicView.hpp"
 #include "view/CGraphicsSceneBase.hpp"
+#include "view/CGraphicView.hpp"
 
 namespace NController
 {
@@ -25,7 +25,7 @@ namespace NController
 CController::CController()
 {
    NView::CGraphicsSceneBase* scene = new NView::CGraphicsSceneBase();
-   NGraphics::CGraphicView* view = new NGraphics::CGraphicView(scene);
+   NView::CGraphicView* view = new NView::CGraphicView(scene);
    view->show();
    if(readConfigs())
    {
