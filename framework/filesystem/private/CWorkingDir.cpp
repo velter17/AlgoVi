@@ -29,8 +29,13 @@ boost::filesystem::path CWorkingDir::getCurrentPath()
 }
 
 CWorkingDir::CWorkingDir()
-    : mCurrentPath(NSettings::CTerminalSettings::getInstance().getHomeDir().toStdString())
 {
+    QString homeDir = NSettings::CTerminalSettings::getInstance().getHomeDir();
+    if(!homeDir.isEmpty() && homeDir[0] == '$')
+    {
+        homeDir = getenv(homeDir.mid(1).toLocal8Bit());
+    }
+    mCurrentPath = homeDir.toStdString();
 }
 
 } // namespace NFileSystem

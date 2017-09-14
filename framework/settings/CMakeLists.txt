@@ -33,7 +33,7 @@ install (
 if ( "${ALGOVI_TARGET_SYSTEM}" STREQUAL "linux" )
     install (
         DIRECTORY "configs/linux/"
-        DESTINATION ${INSTALL_BIN_DIR}
+        DESTINATION ${INSTALL_BIN_DIR}/configs
         FILES_MATCHING PATTERN "*.xml"
     )
 else()
